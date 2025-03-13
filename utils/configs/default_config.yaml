@@ -1,0 +1,56 @@
+##############################
+benchmark_runtime_min: 5
+metric_logging_interval_sec: 10
+runs_per_configuration: 1
+processing_type: P0
+
+##############################
+# Generator setting
+###############################
+generator_num: 1
+generator_type:
+  - constant
+generator_load_hz:
+  - 2
+# Following options are defined for each generator instance
+generator_cpu_num: 1
+generator_threads_per_cpu_num: 1
+# Memory required for each generator in (G)
+generator_mem: 2
+only_data_generator: false
+record_size_bytes: 32
+
+##############################
+# Processor
+##############################
+parallelism_per_worker:
+  - 1
+num_cpus_master: 1
+num_cpus_spare: 1
+num_workers:
+  - 1
+
+##############################
+# Memory (only in G-gigabit)
+##############################
+mem_node_master: 1
+mem_node_worker: 1
+mem_node_spare: 1
+
+# Kafka setup
+kafka_source_topics:
+  - eventsIn
+kafka_sink_topics:
+  - eventsOut
+# Local frameworks
+local_setup:
+  frameworks:
+    maven_home: /path/to/framework
+    java_home: /path/to/framework
+    flink_home: /path/to/framework
+    kafka_home: /path/to/framework
+    spark_home: /path/to/framework
+hpc_setup:
+  project: p_scads
+  exclusive_jobs: false
+  chained_jobs: true
