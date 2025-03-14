@@ -342,13 +342,9 @@ check_var() {
   fi
 }
 
+# To detect HPC
 is_hpc() {
-  if hostname -f | grep -q 'hpc.tu-dresden'; then
-    #"HPC detected"
-    return 0 # Machine matches the condition
-  else
-    return 1 # Machine does not match the condition
-  fi
+  hostname -f | grep -q 'hpc.tu-dresden' && return 0 || return 1
 }
 
 safe_remove_recursive() {

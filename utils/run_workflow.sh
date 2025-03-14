@@ -17,9 +17,9 @@ source "$BENCHMARK_DIR"/utils/init.sh
 # Setting up directory
 logger_info "Setting up experiment directory structure"
 
-export LOG_DIR_RUN_SAVE="$LOG_DIR_RUN"
-export LOG_DIR_RUN="/dev/shm/${SLURM_JOBID}/$LOG_DIR_RUN"
-mkdir -p "$LOG_DIR_RUN_SAVE"
+#export LOG_DIR_RUN_SAVE="$LOG_DIR_RUN"
+#export LOG_DIR_RUN="/dev/shm/${SLURM_JOBID}/$LOG_DIR_RUN"
+#mkdir -p "$LOG_DIR_RUN_SAVE"
 
 source "$BENCHMARK_DIR"/utils/setup_directory_structure.sh "$LOG_DIR_RUN" "$FRAMEWORK" "$INIT_CONF_FILE"
 # We get all the directory variables and $CONF_FILE_RUN from above line
@@ -51,7 +51,7 @@ logger_info "==================================="
 source $BENCHMARK_DIR/utils/benchmark_main.sh "${FRAMEWORK}_TEST_$MODE"
 sleep 10s
 
-cp -r "${LOG_DIR_RUN}" "$(dirname ${LOG_DIR_RUN_SAVE})/"
+#cp -r "${LOG_DIR_RUN}" "$(dirname ${LOG_DIR_RUN_SAVE})/"
 
 logger_info "==================================="
 logger_info "Benchmark run finished"

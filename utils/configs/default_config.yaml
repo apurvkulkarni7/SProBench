@@ -23,6 +23,9 @@ record_size_bytes: 32
 ##############################
 # Processor
 ##############################
+processing_framework:
+  - flink
+  #- spark_streaming
 parallelism_per_worker:
   - 1
 num_cpus_master: 1
@@ -50,7 +53,9 @@ local_setup:
     flink_home: /path/to/framework
     kafka_home: /path/to/framework
     spark_home: /path/to/framework
+    
 hpc_setup:
   project: p_scads
   exclusive_jobs: false
   chained_jobs: true
+  multithreading: false

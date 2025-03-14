@@ -1,10 +1,11 @@
 #!/bin/bash
 
 #set -o pipefail
-set -o errtrace
-set -o errexit
-## set -x
+# set -o errtrace
+# set -o errexit
+#set -x
 #set -v
+set -e
 
 source ${BENCHMARK_DIR}/utils/auxiliary_processes.sh
 
@@ -139,13 +140,10 @@ run() {
         "TaskManagerRunner" "${WORKER_i}_worker"
     done
   elif [[ "START_JMX_KAFKA_COLLECTOR" == "$OPERATION" ]]; then
-    
     local kafka_topic=$2
     local regex_patt=$3
-    
     run_jmx_collector "${KAFKA_SOURCE_HOST}" "KafkaMetricExtractor" "Kafka" \
       "${kafka_topic}" ${regex_patt}
-
   elif [[ "STOP_JMX_COLLECTOR" == "$OPERATION" ]]; then
     # Stopping JVM metric extractor on master node
     pid_files="$(find ${LOG_DIR_RUN_LOG_JMX} -name "*${FLINK_MASTER}*.pid" -type f)"
@@ -194,7 +192,7 @@ run() {
     sleep 5s
     run "START_LOAD"
     run "START_JMX_KAFKA_COLLECTOR" "eventsIn" '^(\d+),'
-    run "START_JMX_KAFKA_COLLECTOR" "eventsOut" '\((\d+),'
+    run "START_JMX_KAFKA_COLLECTOR" "eventsOut" '^(\d+),'
     jps > $LOG_DIR_RUN_LOG/running_java_proceses
     logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
     sleep "${BENCHMARK_RUNTIME_MIN}m"
