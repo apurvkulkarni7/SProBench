@@ -12,6 +12,7 @@
     <modules>
         <module>benchmark-generator</module>
         <module>benchmark-processing-flink</module>
+        <module>benchmark-utils</module>
     </modules>
 
     <properties>

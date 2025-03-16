@@ -9,7 +9,7 @@ run_jmx_collector() {
   
   local jobid=$SLURM_JOBID
   local process_mem="300M"
-  local jmx_classpath="${BENCHMARK_DIR}/utils/jmx-metrics-extractor.jar org.metrics.${metric_collector}"
+  local jmx_classpath="${BENCHMARK_DIR}/benchmark-utils/target/benchmark-utils-1.0.jar org.metrics.${metric_collector}"
   local jmx_jvm_opt="-DlogDir=${LOG_DIR_RUN_LOG_JMX}"
   local METRIC_LOGGING_INTERVAL_MS=$((METRIC_LOGGING_INTERVAL_SEC * 1000))
 
@@ -25,10 +25,11 @@ run_jmx_collector() {
 
   elif [[ "${metric_collector}" == "KafkaMetricExtractor" ]]; then
     local kafka_topics=$4
-    local regex_patt=$5
+    # local regex_patt=$5
     local jmx_pid_file="${LOG_DIR_RUN_LOG_JMX}/${kafka_topics}_KafkaMetricsExtractorApp.log.pid"
     jmx_jvm_opt="$jmx_jvm_opt -DmainLogFileName=${kafka_topics}_KafkaMetricsExtractorApp.log -DmetricLogFileName=${kafka_topics}_throughput_latency.csv"
-    jmx_app_opt="-rt pid -jpn ${process_name} -ktl ${kafka_topics} -rgx '${regex_patt}' -kbs ${KAFKA_SOURCE_BOOTSTRAP_SERVER} -li ${METRIC_LOGGING_INTERVAL_MS} --all"
+    # jmx_app_opt="-rt pid -jpn ${process_name} -ktl ${kafka_topics} -rgx '${regex_patt}' -kbs ${KAFKA_SOURCE_BOOTSTRAP_SERVER} -li ${METRIC_LOGGING_INTERVAL_MS} --all"
+    jmx_app_opt="-rt pid -jpn ${process_name} -ktl ${kafka_topics} -kbs ${KAFKA_SOURCE_BOOTSTRAP_SERVER} -li ${METRIC_LOGGING_INTERVAL_MS} --all"
   else
     logger_error "Incorrect input for \"metric_collector\": $metric_collector."
     exit 1

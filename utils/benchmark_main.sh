@@ -1,11 +1,12 @@
 #!/bin/bash
 
-#set -o pipefail
-# set -o errtrace
+set -o pipefail
+set -o errtrace
 # set -o errexit
 #set -x
 #set -v
 set -e
+trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
 
 source ${BENCHMARK_DIR}/utils/auxiliary_processes.sh
 
@@ -27,8 +28,8 @@ run() {
     # Kafka
     #############################################################################
     # start on every worker
-    if [[ "$KAFKA_ARCH" == "1" ]] || [[ ! $(is_hpc) ]] ; then
-      ${BENCHMARK_DIR}/utils/kafka_utils/kafka_cluster_setup.sh "${KAFKA_SOURCE_HOST}" "${KAFKA_CONF_DIR}" "${LOG_DIR_RUN_LOG_KAFKA}"
+    if [[ "$KAFKA_ARCH" == "1" ]] || [[ $SPB_SYSTEM == "localmachine" ]] ; then
+      source ${BENCHMARK_DIR}/utils/kafka_utils/kafka_cluster_setup.sh "${KAFKA_SOURCE_HOST}" "${KAFKA_CONF_DIR}" "${LOG_DIR_RUN_LOG_KAFKA}"
       LEADER_WORKER="${KAFKA_SOURCE_HOST}"
     elif [[ "$KAFKA_ARCH" == "2" ]]; then
       for WORKER_i in $FLINK_WORKERS; do
@@ -38,7 +39,7 @@ run() {
       done
     fi
     sleep 5s
-    CHECK_INTERVAL_SEC="60" #$((BENCHMARK_RUNTIME_MIN*60/5))
+    CHECK_INTERVAL_SEC="60"
     monitor_kafka_broker "${KAFKA_SOURCE_HOST}" "${SLURM_JOBID}"  "${BENCHMARK_RUNTIME_SEC}" "${CHECK_INTERVAL_SEC}" "${LOG_DIR_RUN_LOG}/STATUS" &
     create_or_update_kafka_topic "${LEADER_WORKER}:9092" "${KAFKA_SOURCE_PARTITION_NUM}" "${KAFKA_SOURCE_TOPICS}"
     
@@ -118,9 +119,6 @@ run() {
         $GENERATOR_OPT > "$LOG_DIR_RUN_LOG_GENERATOR/generator_$GENERATOR_i.out" 2>&1 &
       
       GEN_PID="$!"
-      
-      #${BENCHMARK_DIR}/utils/get_cpu_load.sh "${GEN_PID}" "${LOG_DIR_RUN_LOG_GENERATOR}" &disown
-
       logger_info "Started Load Generator (pid=${GEN_PID}) with load ${GENERATOR_LOAD_PER_GENERATOR_HZ} Hz."
 
       STARTING_CPUID=$((GENERATOR_i+GENERATOR_CPU_NUM))
@@ -141,15 +139,18 @@ run() {
     done
   elif [[ "START_JMX_KAFKA_COLLECTOR" == "$OPERATION" ]]; then
     local kafka_topic=$2
-    local regex_patt=$3
-    run_jmx_collector "${KAFKA_SOURCE_HOST}" "KafkaMetricExtractor" "Kafka" \
-      "${kafka_topic}" ${regex_patt}
+    # local regex_patt=$3
+    run_jmx_collector "${KAFKA_SOURCE_HOST}" "KafkaMetricExtractor" "Kafka" "${kafka_topic}"
   elif [[ "STOP_JMX_COLLECTOR" == "$OPERATION" ]]; then
     # Stopping JVM metric extractor on master node
     pid_files="$(find ${LOG_DIR_RUN_LOG_JMX} -name "*${FLINK_MASTER}*.pid" -type f)"
     for pid_i in $pid_files; do
       logger_info "Killing process: $(basename ${pid_i})"
-      run_remote_cmd ${FLINK_MASTER} "kill $(cat ${pid_i})"
+      if [[ $SPB_SYSTEM =~ (slurm*) ]]; then
+        run_remote_cmd ${FLINK_MASTER} "kill $(cat ${pid_i})"
+      else
+        kill $(cat ${pid_i})
+      fi
     done
 
     # Stopping JMX collectors on worker nodes
@@ -157,7 +158,11 @@ run() {
       pid_files="$(find ${LOG_DIR_RUN_LOG_JMX} -name "*${host}*.pid" -type f)"
       for pid_i in $pid_files; do
         logger_info "Killing process: $(basename ${pid_i})"
-        run_remote_cmd ${host} "kill $(cat ${pid_i}) > /dev/null 2>&1"
+        if [[ $SPB_SYSTEM =~ (slurm*) ]]; then
+          run_remote_cmd ${host} "kill $(cat ${pid_i}) > /dev/null 2>&1"
+        else
+          kill $(cat ${pid_i}) > /dev/null 2>&1
+        fi
       done
     done
   #############################################################################
@@ -171,7 +176,7 @@ run() {
       run "START_KAFKA"
       sleep 5s
       run "START_LOAD"
-      run "START_JMX_KAFKA_COLLECTOR" "eventsIn" "^(\d+),"
+      run "START_JMX_KAFKA_COLLECTOR" "eventsIn"
     fi
     logger_info "Running the data generator for $BENCHMARK_RUNTIME_MIN minutes."
     sleep "${BENCHMARK_RUNTIME_MIN}m"
@@ -191,8 +196,8 @@ run() {
     run "START_FLINK_PROCESSING"
     sleep 5s
     run "START_LOAD"
-    run "START_JMX_KAFKA_COLLECTOR" "eventsIn" '^(\d+),'
-    run "START_JMX_KAFKA_COLLECTOR" "eventsOut" '^(\d+),'
+    run "START_JMX_KAFKA_COLLECTOR" "eventsIn"
+    run "START_JMX_KAFKA_COLLECTOR" "eventsOut"
     jps > $LOG_DIR_RUN_LOG/running_java_proceses
     logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
     sleep "${BENCHMARK_RUNTIME_MIN}m"

@@ -237,18 +237,11 @@ fetch_untar_file() {
   tar -xzvf "$CACHE_DIR/$FILE" --directory "$FW_DIR"
 }
 
-# This is used because custome config directory causes errors
-kafka_tool_wrapper() {
-  cmd=$1
-  shift 1
-  KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$KAFKA_CONF_DIR/tools-log4j.properties" \
-    "$KAFKA_HOME/bin/${cmd}" "$@"
-}
-
 kafka_topic_cmd() {
   KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$KAFKA_CONF_DIR/tools-log4j.properties" \
     $KAFKA_HOME/bin/kafka-topics.sh "$@"
 }
+
 create_or_update_kafka_topic() {
   # Check if the required number of arguments are provided
   if [ "$#" -lt 3 ]; then

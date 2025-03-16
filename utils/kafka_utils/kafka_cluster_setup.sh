@@ -1,21 +1,30 @@
 #!/bin/bash
 set -e
+set -o errtrace
+trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
+
+kafka_tool_wrapper() {
+  cmd=$1
+  shift 1
+  KAFKA_LOG4J_OPTS="-Dlog4j.configuration=file:$KAFKA_CONF_DIR/tools-log4j.properties" \
+    "$KAFKA_HOME/bin/${cmd}" "$@"
+}
 
 HOST=${1:-"localhost"}
 export KAFKA_CONF_DIR=$2
 LOG_DIR=$3
 
-CURR_DIR=$(dirname $(realpath $0))
+CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 source "${CURR_DIR}/../init.sh"
 
-if is_hpc; then  
+if [[ $SPB_SYSTEM =~ slurm_* ]]; then  
   load_modules "release/24.04" "GCC/13.2.0" "Kafka/3.6.1-scala-2.13"
 fi
 
 KAFKA_CLUSTER_ID_FILE="${KAFKA_CONF_DIR}/kafka_cluster_id"
-if [[ ! -f "${KAFKA_CLUSTER_ID_FILE}" ]];then
-  kafka_tool_wrapper kafka-storage.sh random-uuid | awk '{print $NF}' > "${KAFKA_CLUSTER_ID_FILE}"
-fi
+# if [[ ! -f "${KAFKA_CLUSTER_ID_FILE}" ]];then
+kafka_tool_wrapper kafka-storage.sh random-uuid | awk '{print $NF}' > "${KAFKA_CLUSTER_ID_FILE}"
+# fi
 KAFKA_CLUSTER_ID="$(cat "${KAFKA_CLUSTER_ID_FILE}")"
 
 KAFKA_SERVER_FILE="${KAFKA_CONF_DIR}/${HOST}.properties"

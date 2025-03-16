@@ -40,22 +40,38 @@ mem_node_master: 1
 mem_node_worker: 1
 mem_node_spare: 1
 
+##############################
 # Kafka setup
+##############################
 kafka_source_topics:
   - eventsIn
 kafka_sink_topics:
   - eventsOut
+
+##############################
+# Frameworks setup
+##############################
 # Local frameworks
 local_setup:
   frameworks:
-    maven_home: /path/to/framework
-    java_home: /path/to/framework
-    flink_home: /path/to/framework
-    kafka_home: /path/to/framework
-    spark_home: /path/to/framework
-    
+    maven_home: /mydrive/projects/benchmarks/SProBench/frameworks/maven
+    java_home: /usr/lib/jvm/java-11-openjdk-amd64/
+    flink_home: /mydrive/projects/benchmarks/SProBench/frameworks/flink
+    kafka_home: /mydrive/projects/benchmarks/SProBench/frameworks/kafka
+    spark_home: /mydrive/projects/benchmarks/SProBench/frameworks/spark
+
+##############################
+# HPC Job Setup
+##############################
 hpc_setup:
   project: p_scads
   exclusive_jobs: false
   chained_jobs: true
   multithreading: false
+  frameworks:
+    maven_home: frameworks/maven
+    java_home: /usr/lib/jvm/java-11-openjdk-amd64/
+    flink_home: frameworks/flink
+    kafka_home: frameworks/kafka
+    spark_home: frameworks/spark
+
