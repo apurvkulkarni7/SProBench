@@ -30,7 +30,7 @@ public class StreamProcessingMain {
     public static void main(String[] args) {
         CommandLine opt = (new OptionsGenerator(args)).build();
         StreamExecutionEnvironment env = (new SetupStreamExecEnv(opt)).build();
-        DataStream<String> sourceStream = sourceMain.fromSource(env, opt);
+        DataStream<String> sourceStream = sourceMain.fromSource(env, opt).rebalance();
         if (opt.getOptionValue("processing-type").equals("P0")) {
             sinkMain.mySinkTo(
                     sourceStream.map(new MetricLoggerMap<>("events_out_p0", opt.getOptionValue("processing-type"))),
