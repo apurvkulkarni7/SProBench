@@ -6,9 +6,12 @@
 package org.scadsai.benchmarks.streaming.flink.jobs;
 
 import org.apache.commons.cli.CommandLine;
+import org.apache.flink.api.common.functions.FilterFunction;
+import org.apache.flink.api.common.functions.FlatMapFunction;
 import org.apache.flink.api.java.tuple.Tuple3;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
+import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.scadsai.benchmarks.streaming.flink.sinks.sinkMain;
@@ -35,18 +38,14 @@ public class StreamProcessingMain {
                     opt.getOptionValue("sink-kafka-topic")
             );
         } else {
-            DataStream<Tuple3<Long, String, Double>> streamParsed = Transformations.inputEventParser(sourceStream);
+            DataStream<Transformations.SensorReading> streamParsed = Transformations.inputEventParser(sourceStream);
             if (opt.getOptionValue("processing-type").equals("P1")) {
                 sinkMain.mySinkTo(
                         streamParsed
+                                .map(new Transformations.TemperatureConvertorDetector())
+                                .keyBy(value -> value.sensorId)
+                                .map(new Transformations.MovingAverageFlatMap())
                                 .map(new MetricLoggerMap("events_out_p1")),
-                        opt, opt.getOptionValue("sink-kafka-topic")
-                );
-            } else if (opt.getOptionValue("processing-type").equals("P2")) {
-                sinkMain.mySinkTo(
-                        streamParsed
-                                .map(new Transformations.TemperatureUnitConvertor())
-                                .map(new MetricLoggerMap("events_out_p2")),
                         opt, opt.getOptionValue("sink-kafka-topic")
                 );
             }
@@ -54,8 +53,8 @@ public class StreamProcessingMain {
 
         try {
             env.execute();
-        } catch (Exception var5) {
-            throw new RuntimeException(var5);
+        } catch (Exception e) {
+            throw new RuntimeException(e);
         }
     }
 }

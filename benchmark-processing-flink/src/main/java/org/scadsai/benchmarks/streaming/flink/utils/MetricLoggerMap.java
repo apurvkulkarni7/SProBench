@@ -1,7 +1,9 @@
 package org.scadsai.benchmarks.streaming.flink.utils;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
+import org.apache.flink.api.java.tuple.Tuple;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.configuration.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -62,15 +64,9 @@ public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
         ++this.totalReceived;
 
         if (this.processingType.equals("P0")) {
-            //Matcher matcher = pattern.matcher(element.toString());
-            //if (matcher.find()) {
-            //    this.eventTimestamp = Long.valueOf(matcher.group(1));
-            //} else {
-            //    System.out.println("No match found.");
-            //}
-            this.latencyTotal += this.timeTwo - Long.valueOf(element.toString().split(",")[0]);
+        this.latencyTotal += this.timeTwo - Long.valueOf(element.toString().split(",")[0]);
         } else if (this.processingType.equals("P1") || this.processingType.equals("P2")) {
-            this.latencyTotal += this.timeTwo - (Long) ((Tuple3) element).f0;
+            this.latencyTotal += this.timeTwo - (Long) ((Transformations.SensorReading) element).timestamp;
         }
 
 
@@ -78,21 +74,6 @@ public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
             this.timeOne = this.timeTwo;
             this.now = System.currentTimeMillis();
             this.throughput = Math.round((double) this.totalReceived * 1000 / (double) this.loggingIntervalMs);
-
-            //if (this.processingType.equals("P0")) {
-                //Matcher matcher = pattern.matcher(element.toString());
-                //if (matcher.find()) {
-                //    this.eventTimestamp = Long.valueOf(matcher.group(1));
-                //} else {
-                //    System.out.println("No match found.");
-                //}
-                //this.eventTimestamp = Long.valueOf(element.toString().split(",")[0]);
-            //} else if (this.processingType.equals("P1") || this.processingType.equals("P2")) {
-                //this.eventTimestamp = (Long) ((Tuple3) element).f0;
-            //}
-
-            //System.out.println("Current time: " + System.currentTimeMillis() + "| Event time: " + this.eventTimestamp );
-            //this.latency = this.now - this.eventTimestamp; //in ms
             this.latency = this.latencyTotal / this.totalReceived;
 
             if (this.printHeader) {

@@ -1,8 +1,15 @@
 package org.scadsai.benchmarks.streaming.flink.utils;
 
 import org.apache.flink.api.common.functions.MapFunction;
+import org.apache.flink.api.common.functions.RichFlatMapFunction;
+import org.apache.flink.api.common.functions.RichMapFunction;
+import org.apache.flink.api.common.state.ValueState;
+import org.apache.flink.api.common.state.ValueStateDescriptor;
+import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
+import org.apache.flink.api.java.tuple.Tuple4;
+import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -11,6 +18,7 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.flink.configuration.Configuration;
 
 import static org.scadsai.benchmarks.streaming.flink.utils.Tools.roundOfThree;
 
@@ -20,12 +28,32 @@ public class Transformations {
     public Transformations() {
     }
 
-    public static DataStream<Tuple3<Long, String, Double>> inputEventParser(DataStream<String> inputStream) {
-        return inputStream.map(new MapFunction<String, Tuple3<Long, String, Double>>() {
+    public static class SensorReading {
+        public long timestamp;
+        public String sensorId;
+        public double temperature;
+        public boolean aboveThreashold;
+        public double movingAverage;
+
+        public SensorReading(long timestamp, String sensorId, double temperature) {
+            this.timestamp = timestamp;
+            this.sensorId = sensorId;
+            this.temperature = temperature;
+
+        }
+
+        @Override
+        public String toString() {
+            return + this.timestamp + "," + this.sensorId + "," + this.temperature + "," +  this.aboveThreashold + "," + this.movingAverage;
+        }
+    }
+
+    public static DataStream<SensorReading> inputEventParser(DataStream<String> inputStream) {
+        return inputStream.map(new MapFunction<String, SensorReading>() {
             @Override
-            public Tuple3<Long, String, Double> map(String input) throws Exception {
+            public SensorReading map(String input) throws Exception {
                 String[] elements = input.split(",");
-                return new Tuple3<>(Long.parseLong(elements[0]), elements[1], Double.parseDouble(elements[2]));
+                return new SensorReading(Long.parseLong(elements[0]), elements[1], Double.parseDouble(elements[2]));
             }
         });
     }
@@ -37,6 +65,14 @@ public class Transformations {
         }
     }
 
+    public static class TemperatureConvertorDetector implements MapFunction<SensorReading, SensorReading> {
+        @Override
+        public SensorReading map(SensorReading inputStream) throws Exception {
+            inputStream.aboveThreashold = inputStream.temperature > 70;
+            inputStream.temperature = roundOfThree((inputStream.temperature * 9 / 5) + 32);
+            return inputStream;
+        }
+    }
 
     public static DataStream<Tuple2<Long, Double>> windowAverageAll(DataStream<Tuple3<Long, String, Double>> inputStream, long windowengthMs) {
         return inputStream
@@ -49,4 +85,76 @@ public class Transformations {
                 });
     }
 
+
+    public static class MovingAverageFlatMap extends RichMapFunction<
+                SensorReading, // Input: (timestamp, sensor_id, temperature, boolean)
+                SensorReading // Output: (timestamp, sensor_id, temperature, boolean, moving_avg)
+                > {
+
+        private transient ValueState<Tuple2<Double, Integer>> sumCountState;
+
+        @Override
+        public void open(Configuration parameters) {
+            ValueStateDescriptor<Tuple2<Double, Integer>> descriptor =
+                    new ValueStateDescriptor<>("sumCountState", org.apache.flink.api.common.typeinfo.Types.TUPLE(
+                            org.apache.flink.api.common.typeinfo.Types.DOUBLE,
+                            org.apache.flink.api.common.typeinfo.Types.INT));
+            sumCountState = getRuntimeContext().getState(descriptor);
+        }
+
+        @Override
+        public SensorReading map(SensorReading input) throws Exception {
+            // Get the current state
+            Tuple2<Double, Integer> current = sumCountState.value();
+            if (current == null) {
+                current = Tuple2.of(0.0, 0);
+            }
+
+            // Update sum and count
+            current.f0 += input.temperature; // Temperature
+            current.f1 += 1;
+
+            // Compute moving average
+            input.movingAverage = current.f0 / current.f1;
+            // Update state
+            sumCountState.update(current);
+
+            // Emit new Tuple5 with moving average
+            //return new Tuple5<>(input.f0, input.f1, input.f2, input.f3, average);
+            return input;
+        }
+
+//        @Override
+//        public Tuple5<Long, String, Double, Boolean, Double> map(Tuple4<Long, String, Double, Boolean> longStringDoubleBooleanTuple4) throws Exception {
+//            return null;
+//        }
+    }
 }
+
+
+//public class MovingAverageFlatMap extends RichFlatMapFunction<Tuple4, Tuple5> {
+//
+//    private transient ValueState<Tuple2<Double, Integer>> sumCountState;
+//
+//    @Override
+//    public void open(Configuration parameters) {
+//        ValueStateDescriptor<Tuple2<Double, Integer>> descriptor =
+//                new ValueStateDescriptor<>("sumCountState", Types.TUPLE(Types.DOUBLE, Types.INT));
+//        sumCountState = getRuntimeContext().getState(descriptor);
+//    }
+//
+//    @Override
+//    public void flatMap(Tuple4<Long, String, Double, Boolean> input, Collector<Tuple5> out) throws Exception {
+//        Tuple2<Double, Integer> current = sumCountState.value();
+//        if (current == null) {
+//            current = Tuple2.of(0.0, 0);
+//        }
+//
+//        current.f0 += input.f2;
+//        current.f1 += 1;
+//        double average = current.f0 / current.f1;
+//
+//        sumCountState.update(current);
+//        out.collect(new Tuple5(input.f0,input.f1,input.f2,input.f3, average));
+//    }
+//}
