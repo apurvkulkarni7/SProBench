@@ -16,7 +16,7 @@ SPB_RUN_WORKFLOW_SCRIPT_FULL="${SPB_RUN_WORKFLOW_SCRIPT} \
 
 # Local machine job
 system_handler_localmachine() {
-  $($SPB_RUN_WORKFLOW_SCRIPT_FULL)
+  $SPB_RUN_WORKFLOW_SCRIPT_FULL
 }
 
 system_handler_slurm() {

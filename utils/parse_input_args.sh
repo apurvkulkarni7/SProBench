@@ -70,6 +70,9 @@ else
       export LOG_DIR_MAIN="$(realpath $2)"
       shift
       ;;
+    '--setup')
+      SETUP="true"
+      ;;
     '--mode' | '-m')
       if [[ "${2:-'not_set'}" == "not_set" ]]; then
         logger_error "Please provide valid mode with parameter \"$arg\"".
@@ -109,4 +112,8 @@ else
     esac
     shift
   done
+fi
+
+if [[ "$SETUP" == "true" ]]; then
+  utils/setup_benchmark.sh $SPB_SYSTEM $INIT_CONF_FILE
 fi

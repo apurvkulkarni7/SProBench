@@ -7,6 +7,10 @@ source $BENCHMARK_DIR/utils/init.sh
 
 source "$BENCHMARK_DIR/utils/parse_input_args.sh" $@
 
+if [[ "$SETUP" == "true" ]]; then
+  exit 0
+fi
+
 #check_var FRAMEWORK
 check_var LOG_DIR_MAIN
 check_var INIT_CONF_FILE
