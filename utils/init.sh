@@ -25,7 +25,7 @@ case $SPB_SYSTEM in
   echo "Loading modules required initially"
   module purge > /dev/null 2>&1
 
-  local modules="release/24.04 GCCcore/13.2.0 Python/3.11.5 PyYAML/6.0.1"
+  modules="release/24.04 GCCcore/13.2.0 Python/3.11.5 PyYAML/6.0.1"
   for module_i in $modules; do
     if ! module is-loaded $module_i; then
       module load $module_i > /dev/null 2>&1
