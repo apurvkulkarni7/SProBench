@@ -70,6 +70,7 @@ public class ConstantInterval {
                         // kafkaProducer.send(<partition>,<key>,<record>)
                         // data sent: (0 , sensor0 , 1739183658407,sensor0,57.60)
                         kafkaProducer.send(Integer.parseInt(logLine[0]), logLine[1], logLine[2]);
+                        //kafkaProducer.send(logLine[1], logLine[2]);
                     }
                     messageCount.incrementAndGet();
                 }

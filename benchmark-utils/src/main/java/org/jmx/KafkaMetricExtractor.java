@@ -8,7 +8,6 @@ import org.util.CliParamGenerator;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.lang.management.ManagementFactory;
-import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 

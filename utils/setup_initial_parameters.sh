@@ -16,7 +16,7 @@ export FRAMEWORK_LIST="$(yaml $INIT_CONF_FILE '["processing_framework"]')"
 
 FRAMEWORK_LIST=${FRAMEWORK_LIST^^}
 
-if [[ "$TEST_TYPE" == "GENERATOR" ]]; then
+if [[ "$FRAMEWORK_LIST" =~ "GENERATOR" ]]; then
   #export GENERATOR_NUM="$(yaml $INIT_CONF_FILE '["generator_num"]')"
   export GENERATOR_CPU_NUM="$(yaml $INIT_CONF_FILE '["generator_cpu_num"]')"
   export MEM_GENERATOR="$(yaml $INIT_CONF_FILE '["generator_mem"]')"

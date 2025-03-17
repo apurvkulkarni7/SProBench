@@ -3,6 +3,7 @@ package org.scadsai.benchmarks.streaming.generator.sink;
 import org.apache.kafka.clients.producer.KafkaProducer;
 import org.apache.kafka.clients.producer.Producer;
 import org.apache.kafka.clients.producer.ProducerRecord;
+import org.scadsai.benchmarks.streaming.generator.GeneratorMain;
 
 import java.util.Properties;
 
@@ -14,6 +15,8 @@ public class MyKafkaProducer {
     public MyKafkaProducer(Properties producerProperties) {
         producerProperties.put("key.serializer", "org.apache.kafka.common.serialization.StringSerializer");
         producerProperties.put("value.serializer", "org.apache.kafka.common.serialization.StringSerializer");
+        //producerProperties.put(ProducerConfig.PARTITIONER_CLASS_CONFIG, "org.apache.kafka.clients.producer.internals.DefaultPartitioner");
+
         this.producer = new KafkaProducer<String, String>(producerProperties);
         this.kafkaTopic = producerProperties.getProperty("topic");
     }
@@ -27,18 +30,13 @@ public class MyKafkaProducer {
         producer.send(new ProducerRecord<>(this.kafkaTopic, key,val));
     }
     public void send(Integer partition, String key, String input) {
-        producer.send(new ProducerRecord<>(this.kafkaTopic, partition, key, input));
-        // long generateTime = Long.valueOf(input.split(",")[0]);
-        // producer.send(
-        //     new ProducerRecord<>(this.kafkaTopic, partition, key, input),
-        //     (metadata, exception) -> {
-        //         if (exception == null) {
-        //             long writeTime = System.currentTimeMillis();
-        //             long latency = writeTime - generateTime;
-        //             System.out.println("Message latency: " + latency + " ms");
-        //         }
-        //     }
-        // );
+        producer.send(new ProducerRecord<>(this.kafkaTopic, partition, key, input), (metadata, exception) -> {
+            if (exception == null) {
+                GeneratorMain.MainLogger.info("Sent: key:" + key + "value:" + input + " to partition: " + metadata.partition());
+            } else {
+                exception.printStackTrace();
+            }
+        });
     }
 
     public void close() {

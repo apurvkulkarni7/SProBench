@@ -5,7 +5,8 @@ import org.util.CliParamGenerator;
 
 import javax.management.MBeanServerConnection;
 
-import static org.util.MetricUtil.*;
+import static org.util.MetricUtil.getMBeansServerConnection;
+import static org.util.MetricUtil.getMetricsList;
 
 public class PrintMetrics {
     public static void main(String[] args) {

@@ -1,15 +1,13 @@
 package org.scadsai.benchmarks.streaming.flink.utils;
 
 import org.apache.flink.api.common.functions.MapFunction;
-import org.apache.flink.api.common.functions.RichFlatMapFunction;
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.api.common.state.ValueState;
 import org.apache.flink.api.common.state.ValueStateDescriptor;
 import org.apache.flink.api.common.typeinfo.Types;
 import org.apache.flink.api.java.tuple.Tuple2;
 import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple4;
-import org.apache.flink.api.java.tuple.Tuple5;
+import org.apache.flink.configuration.Configuration;
 import org.apache.flink.streaming.api.datastream.DataStream;
 import org.apache.flink.streaming.api.functions.windowing.AllWindowFunction;
 import org.apache.flink.streaming.api.windowing.assigners.TumblingProcessingTimeWindows;
@@ -18,7 +16,6 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.flink.configuration.Configuration;
 
 import static org.scadsai.benchmarks.streaming.flink.utils.Tools.roundOfThree;
 
@@ -96,9 +93,9 @@ public class Transformations {
         @Override
         public void open(Configuration parameters) {
             ValueStateDescriptor<Tuple2<Double, Integer>> descriptor =
-                    new ValueStateDescriptor<>("sumCountState", org.apache.flink.api.common.typeinfo.Types.TUPLE(
-                            org.apache.flink.api.common.typeinfo.Types.DOUBLE,
-                            org.apache.flink.api.common.typeinfo.Types.INT));
+                    new ValueStateDescriptor<>(
+                            "sumCountState", Types.TUPLE(Types.DOUBLE,Types.INT)
+                    );
             sumCountState = getRuntimeContext().getState(descriptor);
         }
 
@@ -115,19 +112,10 @@ public class Transformations {
             current.f1 += 1;
 
             // Compute moving average
-            input.movingAverage = current.f0 / current.f1;
-            // Update state
+            input.movingAverage = roundOfThree(current.f0 / current.f1);
             sumCountState.update(current);
-
-            // Emit new Tuple5 with moving average
-            //return new Tuple5<>(input.f0, input.f1, input.f2, input.f3, average);
             return input;
         }
-
-//        @Override
-//        public Tuple5<Long, String, Double, Boolean, Double> map(Tuple4<Long, String, Double, Boolean> longStringDoubleBooleanTuple4) throws Exception {
-//            return null;
-//        }
     }
 }
 

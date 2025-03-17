@@ -3,30 +3,20 @@ package org.scadsai.benchmarks.streaming.generator.type;
 import org.apache.commons.lang3.RandomStringUtils;
 
 import java.io.UnsupportedEncodingException;
-import java.nio.charset.StandardCharsets;
-import java.sql.Timestamp;
-import java.util.Date;
 import java.util.Random;
 
 public class TemperatureDataGenerator {
-    public static int sensorIdCounter_;
-    private static double mean_;
-    private static double std_;
+    public int sensorIdCounter_ = -1;
+    private static double mean_ = 70.0;
+    private static double std_ = 15.0;
     public static int numberOfSensors_;
     public static int recordSize_;
-    public String fillerString_;
+    public static String fillerString_;
     public TemperatureDataGenerator(int numberOfSensors, int recordSize) {
         numberOfSensors_ = numberOfSensors;
         recordSize_ = recordSize;
-        sensorIdCounter_ = -1;
-        mean_ = 70.0;
-        std_ = 15.0;
 
-        String timestamp = generateTimestamp();
-        String sensorId = generateSensorId();
-        String temperature = generateTemperature();
-        String record = timestamp + "," + "sensor" + sensorId + "," + temperature;
-
+        String record = generateTimestamp() + "," + generateSensorId() + "," + generateTemperature();
         int fillerStringSize;
         try {
             // To get encoding available on the system, run:
@@ -41,7 +31,7 @@ public class TemperatureDataGenerator {
         } else {
             fillerString_ = "";
         }
-
+        sensorIdCounter_ = -1;
     }
 
     public String[] generate() {
@@ -56,14 +46,16 @@ public class TemperatureDataGenerator {
     }
 
     private static String generateTimestamp() {
-        return String.valueOf((new Timestamp((new Date()).getTime())).getTime());
+        return String.valueOf(System.currentTimeMillis());
     }
 
-    private static String generateSensorId() {
-        if (sensorIdCounter_ < numberOfSensors_ - 1) { ++sensorIdCounter_; }
-        else { sensorIdCounter_ = 0; }
-
-        return String.valueOf(sensorIdCounter_);
+    private String generateSensorId() {
+        if (this.sensorIdCounter_ < numberOfSensors_ - 1) {
+            ++this.sensorIdCounter_;
+        } else {
+            this.sensorIdCounter_ = 0;
+        }
+        return String.format("%02d",this.sensorIdCounter_); // padding with 0 for single digit
     }
 
     private static String generateTemperature() {
@@ -72,7 +64,6 @@ public class TemperatureDataGenerator {
         double u2 = 1.0 - random.nextDouble();
         double z = Math.sqrt(-2.0 * Math.log(u1)) * Math.cos(6.283185307179586 * u2);
         double temperature = mean_ + std_ * z;
-
         return String.format("%.2f",temperature);
     }
 

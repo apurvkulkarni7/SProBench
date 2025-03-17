@@ -1,16 +1,9 @@
 package org.scadsai.benchmarks.streaming.flink.utils;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
-import org.apache.flink.api.java.tuple.Tuple;
-import org.apache.flink.api.java.tuple.Tuple3;
-import org.apache.flink.api.java.tuple.Tuple5;
 import org.apache.flink.configuration.Configuration;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-
-import java.nio.charset.StandardCharsets;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
 public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
     private static final Logger MetricLogger = LogManager.getLogger("metric");

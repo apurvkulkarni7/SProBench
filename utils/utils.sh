@@ -42,7 +42,6 @@ run_remote_cmd() {
     local jobid=$SLURM_JOBID
     srun --overlap --nodelist="$host" --jobid="$jobid" /bin/bash -c "$cmd"
   else
-    #ssh "${host}" "${cmd}"
     eval "$cmd"
   fi
 }
@@ -145,25 +144,19 @@ start_if_needed() {
 stop_if_needed() {
   local match="$1"
   local name="$2"
-  local PID=$(pid_match "$match")
-  if [[ "$PID" != "" ]]; then
-    PIDn=1
-    for PIDi in $PID; do
-      kill $PIDi >/dev/null
+  local pids=$(pid_match "$match")
+
+  if [ -n "$pids" ]; then
+    for pid in $pids; do
+      kill "$pid" >/dev/null
       sleep 1s
-      logger_info "$name $PIDn stopped."
-      PIDn=$((PIDn + 1))
+      logger_info "$name stopped with PID $pid."
     done
-    # Rechecking if the process is stopped or not
-    PIDnn=1
-    local CHECK_AGAIN=$(pid_match "$match")
-    while [[ "$CHECK_AGAIN" != "" ]]; do
-      for PIDii in $CHECK_AGAIN; do
-        kill "$PIDii" >/dev/null
+
+    while [ -n "$(pid_match "$match")" ]; do
+      for pid in $(pid_match "$match"); do
+        kill "$pid" >/dev/null
         sleep 5s
-        local CHECK_AGAIN=$(pid_match "$match")
-        logger_info "$name $PIDnn stopped"
-        PIDn=$((PIDnn + 1))
       done
     done
   else

@@ -12,8 +12,8 @@ import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.util.MetricUtil.*;
 import static org.util.MetricUtil.jvmMetricExtractorRunner;
+import static org.util.MetricUtil.setLoggerProperties;
 
 public class JVMMetricExtractor {
     public static void main(String[] args) {

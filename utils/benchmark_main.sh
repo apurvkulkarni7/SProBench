@@ -124,6 +124,8 @@ run() {
       STARTING_CPUID=$((GENERATOR_i+GENERATOR_CPU_NUM))
       ENDING_CPUID=$((STARTING_CPUID+GENERATOR_CPU_NUM))
     done
+  elif [[ "STOP_LOAD" == "$OPERATION" ]]; then
+    stop_if_needed GeneratorMain GeneratorMain
   elif [[ "START_JMX_COLLECTOR" == "$OPERATION" ]]; then
     #############################################################################
     # JMX Utilities
@@ -139,7 +141,6 @@ run() {
     done
   elif [[ "START_JMX_KAFKA_COLLECTOR" == "$OPERATION" ]]; then
     local kafka_topic=$2
-    # local regex_patt=$3
     run_jmx_collector "${KAFKA_SOURCE_HOST}" "KafkaMetricExtractor" "Kafka" "${kafka_topic}"
   elif [[ "STOP_JMX_COLLECTOR" == "$OPERATION" ]]; then
     # Stopping JVM metric extractor on master node
@@ -169,7 +170,6 @@ run() {
   # Workflow - Generator testing
   #############################################################################
   elif [[ "GENERATOR_TEST_START" == "$OPERATION" ]]; then
-
     if [[ "$ONLY_DATA_GENERATOR" == "True" ]]; then
       run "START_LOAD"
     else

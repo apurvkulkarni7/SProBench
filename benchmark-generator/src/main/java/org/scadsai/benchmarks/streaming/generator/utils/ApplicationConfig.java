@@ -1,19 +1,14 @@
 package org.scadsai.benchmarks.streaming.generator.utils;
 
-import org.apache.commons.cli.CommandLine;
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.scadsai.benchmarks.streaming.generator.sink.MyKafkaProducer;
 import org.scadsai.benchmarks.streaming.generator.type.TemperatureDataGenerator;
 
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.util.logging.Logger;
-import java.util.Properties;
 import java.io.FileInputStream;
+import java.io.IOException;
+import java.util.Properties;
+import java.util.logging.Logger;
 
 /**
  * ApplicationConfig represents the configuration for the benchmark application.
@@ -58,10 +53,9 @@ public class ApplicationConfig {
         this.generatorType = commandLine.getOptionValue("generator-type", "constant");
         this.onlyGenerateData = commandLine.hasOption("only-generate-data");
         this.recordSizeB = Integer.parseInt(commandLine.getOptionValue("record-size", "27"));
+        this.numberOfSensors = Integer.parseInt(commandLine.getOptionValue("number-of-sensors")); // This also decides number of partition in kafka topic??
         this.temperatureDataGenerator = new TemperatureDataGenerator(getNumberOfSensors(),getRecordSizeB());
         this.loggingIntervalSec = Long.parseLong(commandLine.getOptionValue("logging-interval-sec", "1"));
-
-        this.numberOfSensors = Integer.parseInt(commandLine.getOptionValue("numberOf-sensors", "1")); // This also decides number of partition in kafka topic??
         this.threadCount = Integer.parseInt(commandLine.getOptionValue("thread-count", "1"));
         this.loadHz = Long.parseLong(commandLine.getOptionValue("loadHz", "1"));
         this.loadHzPerThread =  getLoadHz() / getThreadCount();

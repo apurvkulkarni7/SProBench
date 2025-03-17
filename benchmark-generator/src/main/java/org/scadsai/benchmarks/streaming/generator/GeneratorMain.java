@@ -7,9 +7,6 @@ import org.scadsai.benchmarks.streaming.generator.cases.ConstantInterval;
 import org.scadsai.benchmarks.streaming.generator.cases.RandomInterval;
 import org.scadsai.benchmarks.streaming.generator.utils.ApplicationConfig;
 
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-
 public class GeneratorMain {
     public static final Logger MainLogger = LogManager.getLogger("main");
 
