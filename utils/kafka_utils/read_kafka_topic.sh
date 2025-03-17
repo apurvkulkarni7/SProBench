@@ -31,7 +31,7 @@ else
 
     ./frameworks/kafka/bin/kafka-console-consumer.sh --from-beginning --topic $TOPIC --bootstrap-server $KAFKA_NODE:9092
 
-  elif [[ "$SPB_SYSTEM" =~ slurm_* ]]; then
+  else
     source "${CURR_DIR}/../utils.sh"
     TMP_DIR=./tmp/kafka_tmp
     mkdir -p $TMP_DIR
@@ -43,10 +43,10 @@ else
 #!/bin/bash
 module load release/24.04 GCC/13.2.0 Kafka/3.6.1-scala-2.13
 source framework-configure.sh -f kafka -d ${TMP_DIR}
-kafka-console-consumer.sh --from-beginning --TOPIC $TOPIC --bootstrap-server $KAFKA_NODE:9092
+kafka-console-consumer.sh --from-beginning --topic $TOPIC --bootstrap-server $KAFKA_NODE:9092
 EOF
       chmod +x "$TMP_FILE"
-      srun --nodes=1 --cpus-per-task=1 --mem=100M --time=00:10:00 bash -c "$TMP_FILE"
+      srun --nodes=1 --cpus-per-task=1 --mem=300M --time=00:30:00 bash -c "$TMP_FILE"
       rm -r "${TMP_FILE}"
     else
       $KAFKA_HOME/bin/kafka-console-consumer.sh --from-beginning --TOPIC $TOPIC --bootstrap-server $KAFKA_NODE:9092

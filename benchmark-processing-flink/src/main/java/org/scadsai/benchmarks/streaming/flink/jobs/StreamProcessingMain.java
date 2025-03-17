@@ -39,14 +39,14 @@ public class StreamProcessingMain {
                 sinkMain.mySinkTo(
                         streamParsed
                                 .map(new Transformations.TemperatureConvertorDetector())
-                                .keyBy(value -> value.sensorId)
-                                .map(new Transformations.MovingAverageFlatMap())
                                 .map(new MetricLoggerMap("events_out_p1")),
-                        opt, opt.getOptionValue("sink-kafka-topic")
+                        opt,
+                        opt.getOptionValue("sink-kafka-topic")
                 );
             }
         }
-
+        // .keyBy(value -> value.sensorId)
+        // .map(new Transformations.MovingAverageFlatMap())
         try {
             env.execute();
         } catch (Exception e) {

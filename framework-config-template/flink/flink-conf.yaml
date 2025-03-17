@@ -170,7 +170,14 @@ parallelism.default: FLINK_PARALLELISM
 # Flag to enable/disable incremental checkpoints for backends that
 # support incremental checkpoints (like the RocksDB state backend). 
 #
-# state.backend.incremental: false
+# # state.backend.incremental: false
+
+# state.checkpoints.dir: file://FLINK_LOG_DIR/flink-checkpoints
+# state.backend: rocksdb
+# state.backend.rocksdb.memory.managed: true
+# state.backend.rocksdb.block-cache-size: 2g
+# state.backend.rocksdb.write-buffer-size: 256m
+# state.checkpoints.interval: 5000
 
 # The failover strategy, i.e., how the job computation recovers from task failures.
 # Only restart tasks that may have been affected by the task failure, which typically includes
@@ -233,7 +240,7 @@ rest.bind-address: FLINK_MASTER_HOSTNAME
 # multiple I/O threads against that directory. This is for example relevant for
 # high-throughput RAIDs.
 #
-# io.tmp.dirs: /tmp
+#io.tmp.dirs: FLINK_LOG_DIR/flink-io
 
 # The classloading resolve order. Possible values are 'child-first' (Flink's default)
 # and 'parent-first' (Java's default).
@@ -248,9 +255,12 @@ rest.bind-address: FLINK_MASTER_HOSTNAME
 # no tuning. Adjusting them may be necessary in case of an "Insufficient number
 # of network buffers" error. The default min is 64MB, the default max is 1GB.
 # 
-# taskmanager.memory.network.fraction: 0.1
+#taskmanager.memory.network.fraction: 0.1
 # taskmanager.memory.network.min: 64mb
 # taskmanager.memory.network.max: 1gb
+# taskmanager.network.memory.min: 32mb
+# taskmanager.network.memory.max: 1g
+taskmanager.network.memory.fraction: 0.2
 
 #==============================================================================
 # Flink Cluster Security Configuration
@@ -313,6 +323,8 @@ metrics.fetcher.update-interval: 0
 #metrics.latency.granularity: single
 #metrics.latency.history-size: 128
 #metrics.latency.interval: METRIC_LOGGING_INTERVAL_SEC
+# flink.sink.kafka.producer.batch.size: 10000
 
+#taskmanager.env.java.options: "-XX:+UseG1GC -XX:MaxGCPauseMillis=50 -XX:InitiatingHeapOccupancyPercent=35"
 env.log.dir: FLINK_LOG_DIR
 env.java.home: JAVA_HOME

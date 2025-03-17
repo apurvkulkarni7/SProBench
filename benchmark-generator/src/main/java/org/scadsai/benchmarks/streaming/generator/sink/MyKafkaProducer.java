@@ -30,13 +30,14 @@ public class MyKafkaProducer {
         producer.send(new ProducerRecord<>(this.kafkaTopic, key,val));
     }
     public void send(Integer partition, String key, String input) {
-        producer.send(new ProducerRecord<>(this.kafkaTopic, partition, key, input), (metadata, exception) -> {
-            if (exception == null) {
-                GeneratorMain.MainLogger.info("Sent: key:" + key + "value:" + input + " to partition: " + metadata.partition());
-            } else {
-                exception.printStackTrace();
-            }
-        });
+        producer.send(new ProducerRecord<>(this.kafkaTopic, partition, key, input));
+        // , (metadata, exception) -> {
+        //     if (exception == null) {
+        //         GeneratorMain.MainLogger.info("Sent: key:" + key + "value:" + input + " to partition: " + metadata.partition());
+        //     } else {
+        //         exception.printStackTrace();
+        //     }
+        // });
     }
 
     public void close() {
