@@ -1,31 +1,66 @@
 ##############################
+# Benchmark Settings
+##############################
+#
+# The following settings are used to configure the benchmarking process.
+#
+# - benchmark_runtime_min: The minimum runtime for the benchmark in minutes.
+#   This is the minimum amount of time that the benchmark will run for.
+# - metric_logging_interval_sec: The interval at which metrics are logged in
+#   seconds.
+# - runs_per_configuration: The number of times each configuration is run.
+#   This allows the benchmark to be repeated multiple times with the same
+#   configuration.
+# - processing_type: The type of processing used in the benchmark
+#   (P0: passthrough, P1: CPU-intensive, P2: Memory intensive).
 benchmark_runtime_min: 5
 metric_logging_interval_sec: 10
 runs_per_configuration: 1
 processing_type: P0
 
 ##############################
-# Generator setting
-###############################
-generator_num: 1
+# Generator Settings
+##############################
+#
+# The following settings are used to configure the generators used in the
+# benchmarking process.
+#
+# - generator_type: The type of generator used (constant, burst, random).
+# - generator_load_hz: The total workload in Hz.
+# - generator_cpu_num: The number of CPUs allocated to each generator.
+# - generator_threads_per_cpu_num: The number of threads per CPU for each
+#   generator.
+# - generator_mem: The memory required for each generator in GB.
+# - only_data_generator: A flag to indicate if only data generator is used.
+#   This can be used to test and optimize generator.
+# - record_size_bytes: The size of each record in bytes. Minimum size for
+#   sensor data is 27 bytes.
 generator_type:
   - constant
 generator_load_hz:
   - 2
-# Following options are defined for each generator instance
 generator_cpu_num: 1
 generator_threads_per_cpu_num: 1
-# Memory required for each generator in (G)
 generator_mem: 2
 only_data_generator: false
 record_size_bytes: 32
 
 ##############################
-# Processor
+# Processor Settings
 ##############################
+#
+# The following settings are used to configure the processing framework used in
+# the benchmarking process.
+#
+# - processing_framework: The framework used for processing
+#   (flink, spark, kafkastream)
+# - parallelism_per_worker: The parallelism per worker. By default 1 CPU per
+#   parallelism pipeline is used.
+# - num_cpus_master: The number of CPUs allocated to the master node.
+# - num_cpus_spare: The number of spare CPUs for other auxiliary processes.
+# - num_workers: The number of worker nodes.
 processing_framework:
   - flink
-  #- spark_streaming
 parallelism_per_worker:
   - 1
 num_cpus_master: 1
@@ -34,44 +69,124 @@ num_workers:
   - 1
 
 ##############################
-# Memory (only in G-gigabit)
+# Memory Settings
 ##############################
+#
+# The following settings are used to configure the memory requirements for the
+# benchmarking process.
+#
+# - mem_node_master: The memory allocated to the master node in GB.
+# - mem_node_worker: The memory allocated to each worker node in GB.
+# - mem_node_spare: The spare memory in GB for auxilliary process.
 mem_node_master: 1
 mem_node_worker: 1
 mem_node_spare: 1
 
 ##############################
-# Kafka setup
+# Message broker Settings
 ##############################
+#
+# The following settings are used to configure the Kafka setup used in the
+# benchmarking process.
+#
+# - kafka_source_topics: The source topics for Kafka from which data will
+#   be read.
+# - kafka_sink_topics: The sink topics for Kafka. This specifies the topics
+#   to which data will be written.
 kafka_source_topics:
   - eventsIn
 kafka_sink_topics:
   - eventsOut
 
 ##############################
-# Frameworks setup
+# Frameworks Setup
 ##############################
-# Local frameworks
-local_setup:
-  frameworks:
-    maven_home: /mydrive/projects/benchmarks/SProBench/frameworks/maven
-    java_home: /usr/lib/jvm/java-11-openjdk-amd64/
-    flink_home: /mydrive/projects/benchmarks/SProBench/frameworks/flink
-    kafka_home: /mydrive/projects/benchmarks/SProBench/frameworks/kafka
-    spark_home: /mydrive/projects/benchmarks/SProBench/frameworks/spark
+#
+# The following options are available for each framework:
+#
+# - version: The version of the framework to be used.
+# - local_setup: The setup options for local environments.
+#   - path: The path to the framework installation. If set to 'default', the
+#     installer will attempt to install the framework at the default location.
+# - slurm_setup: The setup options for HPC environments.
+#   - use_module_system: Whether to use the module system for loading the
+#     framework. If set to false, then it will be installed on location
+#     mentioned in path parameter
+#   - module_name_version: The version of the module to be used.
+#   - dependent_modules: A list of dependent modules required by the framework.
+#   - path: The path to the framework installation. If set to 'default', the
+#     installer will attempt to install the framework at the default location
+#     <Benchmarkdir>/frameworks/<framework_name>.
+frameworks:
+    java:
+      version:
+      local_setup:
+        path: default
+      slurm_setup:
+        use_module_system: true
+        module_name_version:
+        dependent_modules:
+          - module1
+          - module2
+        path: default
+    maven:
+      version: 1.9.0
+      local_setup:
+        path: default
+      slurm_setup:
+        use_module_system: true
+        module_name_version:
+        dependent_modules:
+          - module1
+          - module2
+        path: default
+    flink:
+      version:
+      local_setup:
+        path: default
+      slurm_setup:
+        use_module_system: true
+        module_name_version:
+        dependent_modules:
+          - module1
+          - module2
+        path: default
+    kafka:
+      version:
+      local_setup:
+        path: default
+      slurm_setup:
+        use_module_system: true
+        module_name_version:
+        dependent_modules:
+          - module1
+          - module2
+        path: default
+    spark:
+      version:
+      local_setup:
+        path: default
+      slurm_setup:
+        use_module_system: true
+        module_name_version:
+        dependent_modules:
+          - module1
+          - module2
+        path: default
 
 ##############################
-# HPC Job Setup
+# Slurm Job Allocation Setup
 ##############################
-hpc_setup:
-  project: p_scads
+#
+# The following settings are used to configure the HPC job setup used in the
+# benchmarking process.
+#
+# - project: The project name for the HPC job.
+# - exclusive_jobs: A flag to indicate if jobs are exclusive.
+# - chained_jobs: A flag to indicate if jobs are chained or run independently.
+# - multithreading: A flag to indicate if multithreading is enabled.
+slurm_setup:
+  project: project_id
   exclusive_jobs: false
   chained_jobs: true
   multithreading: false
-  frameworks:
-    maven_home: frameworks/maven
-    java_home: /usr/lib/jvm/java-11-openjdk-amd64/
-    flink_home: frameworks/flink
-    kafka_home: frameworks/kafka
-    spark_home: frameworks/spark
-

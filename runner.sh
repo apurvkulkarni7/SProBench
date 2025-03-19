@@ -3,15 +3,14 @@ set -e
 
 BENCHMARK_DIR=$(dirname "$(readlink -f "$0")")
 
-source $BENCHMARK_DIR/utils/init.sh
 
 source "$BENCHMARK_DIR/utils/parse_input_args.sh" $@
+source $BENCHMARK_DIR/utils/init.sh
 
 if [[ "$SETUP" == "true" ]]; then
   exit 0
 fi
 
-#check_var FRAMEWORK
 check_var LOG_DIR_MAIN
 check_var INIT_CONF_FILE
 check_var MODE
