@@ -11,8 +11,7 @@ MODE=$7
 SPB_SYSTEM=$8
 
 SPB_RUN_WORKFLOW_SCRIPT="${BENCHMARK_DIR}/utils/run_workflow.sh"
-SPB_RUN_WORKFLOW_SCRIPT_FULL="${SPB_RUN_WORKFLOW_SCRIPT} \
-  ${FRAMEWORK} ${LOG_DIR_RUN} ${NUM_WORKERS} ${NUM_CPU_WORKERS} ${GENERATOR_LOAD_HZ} ${INIT_CONF_FILE} ${MODE}"
+SPB_RUN_WORKFLOW_SCRIPT_FULL="${SPB_RUN_WORKFLOW_SCRIPT} ${FRAMEWORK} ${LOG_DIR_RUN} ${NUM_WORKERS} ${NUM_CPU_WORKERS} ${GENERATOR_LOAD_HZ} ${INIT_CONF_FILE} ${BENCHMARK_DIR} ${MODE}"
 
 # Local machine job
 system_handler_localmachine() {
@@ -26,9 +25,7 @@ system_handler_slurm() {
       logger_error "No interactive job is started. Please start an interactive job"
       return 1
     fi
-    run_workflow
-    # "${BENCHMARK_DIR}/utils/run_workflow.sh" \
-    #   $FRAMEWORK $LOG_DIR_RUN $NUM_WORKERS $NUM_CPU_WORKERS $GENERATOR_LOAD_HZ $INIT_CONF_FILE $MODE
+    $SPB_RUN_WORKFLOW_SCRIPT_FULL
     ;;
   slurm_batch)
     check_var HPC_PROJECT_ID
@@ -66,7 +63,6 @@ system_handler_slurm() {
 
     if [[ "${HPC_MULTITHREADING,,}" == "true" ]]; then
       unset SLURM_HINT
-      #SPB_SLURM_BATCH_OPTS="${SPB_SLURM_BATCH_OPTS} --hint=multithread"
       SPB_SLURM_BATCH_OPTS+=("--hint=multithread")
     fi
 

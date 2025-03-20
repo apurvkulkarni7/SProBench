@@ -2,22 +2,22 @@
 # setup_initial_parameters.sh
 set -e
 
-  INIT_CONF_FILE="$1"
+CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
+INIT_CONF_FILE="$1"
 check_file INIT_CONF_FILE
 
 # Looping parameters
-export NUM_CPU_WORKERS_LIST="$(yaml $INIT_CONF_FILE '["parallelism_per_worker"]')"
-export NUM_WORKERS_LIST="$(yaml $INIT_CONF_FILE '["num_workers"]')"
-export GENERATOR_LOAD_HZ_LIST="$(yaml $INIT_CONF_FILE '["generator_load_hz"]')"
-export RUNS_PER_CONFIG="$(yaml $INIT_CONF_FILE '["runs_per_configuration"]')"
-export PROCESSING_TYPE="$(yaml $INIT_CONF_FILE '["processing_type"]')"
-export FRAMEWORK_LIST="$(yaml $INIT_CONF_FILE '["processing_framework"]')"
+NUM_CPU_WORKERS_LIST="$($YQ  '.stream_processor.worker.parallelism | join(" ")' $INIT_CONF_FILE)"
+NUM_WORKERS_LIST="$($YQ '.stream_processor.worker.instances | join(" ")' $INIT_CONF_FILE)"
+GENERATOR_LOAD_HZ_LIST="$($YQ '.total_workload_hz | join(" ")' $INIT_CONF_FILE)"
+RUNS_PER_CONFIG="$($YQ '.runs_per_configuration' $INIT_CONF_FILE)"
+PROCESSING_TYPE="$($YQ '.stream_processor.processing_type' $INIT_CONF_FILE)"
+FRAMEWORK_LIST="$($YQ '.stream_processor.framework | join(" ")' $INIT_CONF_FILE)"
 
 FRAMEWORK_LIST=${FRAMEWORK_LIST^^}
 
-if [[ "$FRAMEWORK_LIST" =~ "GENERATOR" ]]; then
-  #export GENERATOR_NUM="$(yaml $INIT_CONF_FILE '["generator_num"]')"
-  export GENERATOR_CPU_NUM="$(yaml $INIT_CONF_FILE '["generator_cpu_num"]')"
-  export MEM_GENERATOR="$(yaml $INIT_CONF_FILE '["generator_mem"]')"
+if [[ "$FRAMEWORK_LIST" =~ "(GENERATOR|MESSAGE_BROKER)" ]]; then
+  GENERATOR_CPU_NUM="$($YQ '.generator.cpu' $INIT_CONF_FILE)"
+  MEM_GENERATOR="$($YQ '.generator.memory_gb' $INIT_CONF_FILE)"
 fi

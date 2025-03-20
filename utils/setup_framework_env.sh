@@ -1,78 +1,73 @@
 #!/bin/bash
-#TODO: Implement version check
 set -e
 
-usage () {
-echo "[Usage]: $0 <FLINK|SPARK_STREAM|KAFKA_STREAM>"
-echo ""
-echo "[Description]:"
-echo "  FLINK/SPARK_STREAMING/KAFKA_STREAM  : Setup env variables for required"
-echo "                                        framework."
-}
-
-FRAMEWORK="$1"
+check_var SPB_SYSTEM
+check_var FRAMEWORK
 
 # Copy configuration from template directory
-if is_hpc; then
-  source framework-configure.sh --framework kafka --template $FRAMEWORK_CONFIG_TEMPLATE_KAFKA --destination $LOG_DIR_RUN_CONFIG
-
-  if [[ "$FRAMEWORK" == "FLINK" ]]; then
-    source framework-configure.sh --framework flink --template $FRAMEWORK_CONFIG_TEMPLATE_FLINK --destination $LOG_DIR_RUN_CONFIG
-  fi
-else
+case $SPB_SYSTEM in
+localmachine)
   cp -r $FRAMEWORK_CONFIG_TEMPLATE_KAFKA $LOG_DIR_RUN_CONFIG/
   if [[ "$FRAMEWORK" == "FLINK" ]]; then
     cp -r $FRAMEWORK_CONFIG_TEMPLATE_FLINK $LOG_DIR_RUN_CONFIG/
   fi
-fi
 
-if is_hpc; then
-  NODE_LIST=$(scontrol show hostname $SLURM_NODELIST | sort -u)
-else
   NODE_LIST="localhost"
-fi
+  ;;
+slurm_interactive|slurm_batch)
+  source framework-configure.sh --framework kafka --template $FRAMEWORK_CONFIG_TEMPLATE_KAFKA --destination $LOG_DIR_RUN_CONFIG
+  # Initialize framework configuration
+  FRAMEWORK_CONFIG_TEMPLATE="FRAMEWORK_CONFIG_TEMPLATE_${FRAMEWORK^^}" # Construct the variable name
+  source framework-configure.sh --framework ${FRAMEWORK,,} --template ${!FRAMEWORK_CONFIG_TEMPLATE} --destination $LOG_DIR_RUN_CONFIG
+
+  NODE_LIST=$(scontrol show hostname $SLURM_NODELIST | sort -u)
+  ;;
+esac
 export NODE_LIST=($NODE_LIST)
 
 #export ARCHITECTURE_TYPE=0
 logger_info "Total available nodes: ${NODE_LIST[*]}"
 
 #################################################################
-# Flink configuration
+# Framework env configuration
 #################################################################
-if [ "$FRAMEWORK" == "FLINK" ]; then
+case ${FRAMEWORK,,} in
+flink)
   export FLINK_MASTER="${NODE_LIST[0]}"
-  if ! is_hpc; then
+  case $SPB_SYSTEM in
+  localmachine)
     export FLINK_WORKERS="$FLINK_MASTER"
     export FLINK_WORKERS_NUM="$NUM_WORKERS"
     export FLINK_SLOTS_PER_TASKMANAGER="$NUM_CPU_WORKERS"
-    export FLINK_PARALLELISM=${FLINK_PARALLELISM:-$((FLINK_SLOTS_PER_TASKMANAGER*FLINK_WORKERS_NUM))}
+    export FLINK_PARALLELISM=${FLINK_PARALLELISM:-$((FLINK_SLOTS_PER_TASKMANAGER * FLINK_WORKERS_NUM))}
     export FLINK_MEM_MASTER=${MEM_MASTER:-"3G"}
     export FLINK_MEM_PER_WORKER=${MEM_NODE_WORKER:-"3G"}
     export FLINK_MEM_PER_WORKER_SPARE=$MEM_NODE_WORKER_SPARE
-  else
+    ;;
+  slurm_interactive | slurm_batch)
     export FLINK_WORKERS_NUM=$NUM_WORKERS
     if [[ "${#NODE_LIST[@]}" -eq 1 ]]; then
-    #if [[ "${FLINK_WORKERS_NUM}" -eq 1 ]]; then
+      #if [[ "${FLINK_WORKERS_NUM}" -eq 1 ]]; then
       # current setup
-      #            -------------------------------------------------
-      # Node1      |  Zookeeper, Kafka, Flink Master, Flink worker |
-      #            -------------------------------------------------
+      #            -------------------------------------------------------
+      # Node1      | Generator, Kafka broker, Flink Master, Flink worker |
+      #            -------------------------------------------------------
       export FLINK_WORKERS=$FLINK_MASTER
     else
       # this setup
-      #            -----------------------------------
-      # Node1      |  Zookeeper, Kafka, Flink Master |
-      #            -----------------------------------
+      #            ------------------------------------------
+      # Node1      |  Generator, Kafka broker, Flink Master |
+      #            ------------------------------------------
       #            -----------------  -----------------
       # Node 2..x  | Flink Worker1 |  | Flink Worker2 |  ...
       #            -----------------  -----------------
       #
       export FLINK_WORKERS_TMP=${NODE_LIST[@]:1} # Removing 1st node
       export FLINK_WORKERS=${FLINK_WORKERS_TMP}
-      
+
       # Another configuration could be
       #            ----------------------------
-      # Node1      |  Zookeeper, Kafka, Redis |
+      # Node1      |  Kafka broker, Generator |
       #            ----------------------------
       #            ----------------
       # Node2      | Flink Master |
@@ -92,7 +87,7 @@ if [ "$FRAMEWORK" == "FLINK" ]; then
     #      fi
     #export FLINK_SLOTS_PER_TASKMANAGER=${FLINK_SLOTS_PER_TASKMANAGER:-$tmp_sptm}
     #export FLINK_PARALLELISM=${FLINK_PARALLELISM:-$((${#FLINK_WORKERS_NUM[@]}*$FLINK_SLOTS_PER_TASKMANAGER))}
-    export FLINK_PARALLELISM=${FLINK_PARALLELISM:-$((FLINK_SLOTS_PER_TASKMANAGER*FLINK_WORKERS_NUM))}
+    export FLINK_PARALLELISM=${FLINK_PARALLELISM:-$((FLINK_SLOTS_PER_TASKMANAGER * FLINK_WORKERS_NUM))}
 
     export FLINK_MEM_MASTER="${MEM_MASTER}"
     export FLINK_MEM_PER_WORKER="${MEM_NODE_WORKER}"
@@ -100,18 +95,19 @@ if [ "$FRAMEWORK" == "FLINK" ]; then
 
     # Memory
     if [[ -z ${MEM_NODE_WORKER} ]]; then
-        echo "Computing TM memory."
-        total_memory=$(scontrol show jobid $SLURM_JOBID | tr '\n' '\r' | sed 's/\S*.*mem=\([0-9]*\)\w.*\S*/\1\n/g')
-        ((taskmanager_memory=total_memory/$SLURM_JOB_NUM_NODES))
+      echo "Computing TM memory."
+      total_memory=$(scontrol show jobid $SLURM_JOBID | tr '\n' '\r' | sed 's/\S*.*mem=\([0-9]*\)\w.*\S*/\1\n/g')
+      ((taskmanager_memory = total_memory / $SLURM_JOB_NUM_NODES))
 
-        # Total node memory to be allocated for taskmanager
-        # TODO Currently implemented for 1TM/node. Extend this for multiple TM/node
-        spare_mem_per_node_val=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '\d*')
-        spare_mem_per_node_unit=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '[^\d]*')
-        ((taskmanager_memory=taskmanager_memory-$spare_mem_per_node_val))
-        export FLINK_MEM_NODE_WORKER="${taskmanager_memory}G" # This is used only when a single taskmanager/node is used
+      # Total node memory to be allocated for taskmanager
+      # TODO Currently implemented for 1TM/node. Extend this for multiple TM/node
+      spare_mem_per_node_val=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '\d*')
+      spare_mem_per_node_unit=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '[^\d]*')
+      ((taskmanager_memory = taskmanager_memory - $spare_mem_per_node_val))
+      export FLINK_MEM_NODE_WORKER="${taskmanager_memory}G" # This is used only when a single taskmanager/node is used
     fi
-  fi
+    ;;
+  esac
 
   # Variables independent of setup type
   #export FLINK_CHECKPOINT_INTERVAL="${FLINK_CHECKPOINT_INTERVAL:-"60000"}" #in ms
@@ -126,12 +122,12 @@ if [ "$FRAMEWORK" == "FLINK" ]; then
   export FLINK_MASTER_FILE="$FLINK_CONF_DIR/masters"
   export FLINK_WORKERS_FILE="$FLINK_CONF_DIR/workers"
   export FLINK_CONF_YAML_FILE="$FLINK_CONF_DIR/flink-conf.yaml"
-
-
-elif [ "$FRAMEWORK" = "SPARK" ]; then
+  ;;
+spark)
   logger_error "Not implemented yet."
   exit 1
-fi
+  ;;
+esac
 
 #################################################################
 # Kafka configuration
@@ -156,25 +152,24 @@ export KAFKA_LOG_DIR="/dev/shm/${USER}/${SLURM_JOBID}/$LOG_DIR_RUN_LOG_KAFKA/kaf
 
 if ! is_hpc; then
   # Kafka configuration
-#  export KAFKA_SOURCE_HOST="$(hostname)"
+  #  export KAFKA_SOURCE_HOST="$(hostname)"
   export KAFKA_SOURCE_HOST="localhost"
   export KAFKA_SOURCE_PORT="9092"
   export KAFKA_SOURCE_BOOTSTRAP_SERVER="${KAFKA_SOURCE_HOST}:${KAFKA_SOURCE_PORT}"
-#  export KAFKA_SOURCE_TOPICS=${KAFKA_SOURCE_TOPICS:-"events"}
-#  export KAFKA_SOURCE_PARTITION_NUM="${NUM_CPU_WORKERS}"
+  #  export KAFKA_SOURCE_TOPICS=${KAFKA_SOURCE_TOPICS:-"events"}
+  #  export KAFKA_SOURCE_PARTITION_NUM="${NUM_CPU_WORKERS}"
 
-#  export KAFKA_SINK_HOST="$(hostname)"
+  #  export KAFKA_SINK_HOST="$(hostname)"
   export KAFKA_SINK_HOST="localhost"
   export KAFKA_SINK_PORT="9092"
   export KAFKA_SINK_BOOTSTRAP_SERVER="${KAFKA_SINK_HOST}:${KAFKA_SINK_PORT}"
-#  export KAFKA_SINK_TOPICS=${KAFKA_SINK_TOPICS:-"events-sink"}
-#  #export KAFKA_SINK_PARTITION_NUM="${KAFKA_SINK_PARTITION_NUM:-"1"}"
-#  export KAFKA_SINK_PARTITION_NUM="${NUM_CPU_WORKERS}"
+  #  export KAFKA_SINK_TOPICS=${KAFKA_SINK_TOPICS:-"events-sink"}
+  #  #export KAFKA_SINK_PARTITION_NUM="${KAFKA_SINK_PARTITION_NUM:-"1"}"
+  #  export KAFKA_SINK_PARTITION_NUM="${NUM_CPU_WORKERS}"
 
   export KAFKA_CONF_DIR="$LOG_DIR_RUN_CONFIG_KAFKA"
 
 else
-
 
   # Kafka configuration
   # Processing Kafka Source
@@ -193,7 +188,7 @@ else
 
   export KAFKA_ARCH="1"
   if [[ "${KAFKA_ARCH}" == "1" ]]; then
-    #   NODE_ID=1  
+    #   NODE_ID=1
     #   sed -i 's|KAFKA_SERVER_HOSTNAME|'$KAFKA_SOURCE_HOST'|g' "$KAFKA_CONFIG_SERVER_FILE"
     #   sed -i 's|NODE_ID|'$NODE_ID'|g' "$KAFKA_CONFIG_SERVER_FILE"
     #   sed -i 's|KAFKA_SERVER_HOSTNAME_ALL|'$NODE_ID'@'$KAFKA_SOURCE_HOST':9093|g' "$KAFKA_CONFIG_SERVER_FILE"
@@ -208,7 +203,7 @@ else
     export KAFKA_SINK_BOOTSTRAP_SERVER="${KAFKA_SOURCE_BOOTSTRAP_SERVER}"
 
   elif [[ "${KAFKA_ARCH}" == "2" ]]; then
-    if [[ "$MODE" == "GENERATOR" ]];then
+    if [[ "$MODE" == "GENERATOR" ]]; then
       WORKERS="${NODE_LIST[0]}"
     else
       WORKERS="$FLINK_WORKERS"
@@ -219,7 +214,7 @@ else
     KAFKA_PORT=9092
     for WORKER_i in $WORKERS; do
       KAFKA_SERVERS+="${NODE_ID}@${WORKER_i}:${KAFKA_PORT},"
-      ((NODE_ID=NODE_ID+1))
+      ((NODE_ID = NODE_ID + 1))
     done
     export KAFKA_SERVERS=${KAFKA_SERVERS%,}
 
@@ -230,9 +225,7 @@ else
       cp "$KAFKA_CONFIG_SERVER_FILE" "$KAFKA_CONFIG_SERVER_FILE_i"
       sed -i 's|KAFKA_SERVER_HOSTNAME|'$KAFKA_SOURCE_HOST'|g' "$KAFKA_CONFIG_SERVER_FILE_i"
       sed -i 's|NODE_ID|'$NODE_ID'|g' "$KAFKA_CONFIG_SERVER_FILE_i"
-      ((NODE_ID=NODE_ID+1))
+      ((NODE_ID = NODE_ID + 1))
     done
   fi
 fi
-
-

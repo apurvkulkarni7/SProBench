@@ -13,28 +13,13 @@ function print_usage() {
     echo ""
     echo "Options:"
     #echo "-t (required): The type of application to start or stop. Possible values: GENERTOR, FLINK, SPARK-STREAMING, KAFKASTREAMING"
-    echo "--output_dir, -s    : The system type"
+    echo "--system_type, -s    : The system type"
     echo "--output_dir, -o    : The directory where experiment data will be stored"
     echo "--conf_file, -c  : The path to the experiment main configuration file."
     echo "--mode, -m          : The execution mode. Possible values: START(default), STOP"
     echo ""
   fi
 }
-
-logger() {
-  local log_level=${1:-"info"}
-  shift
-  local message=$*
-  local timestamp=$(date +%F_%T)
-  case "$log_level" in
-    'info'|'INFO') log_level="INFO";;
-    'error'|'ERROR') log_level="ERROR" ;;
-    *) log_level="INFO";;
-  esac
-  echo "[${timestamp}] [${log_level}]: ${message}" 
-}
-logger_error() { logger "error" "$@"; }
-logger_info() { logger "info" "$@"; }
 
 if [[ "$#" -lt "3" ]]; then
   logger_error "Not enough arguments are provided."
@@ -91,7 +76,7 @@ else
       export INIT_CONF_FILE=$(realpath $2)
       shift
       ;;
-    '--system' | '-s')
+    '--system_type' | '-s')
       # We need this because we want get this info on run time for compilation and for starting slurm jobs
       if [[ "${2:-not_set}" == "not_set" ]] || ! [[ "$2" =~ ^(localmachine|slurm_interactive|slurm_batch)$ ]]; then
         logger_error "Please provide valid system with parameter \"$arg\""

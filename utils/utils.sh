@@ -1,14 +1,20 @@
 #!/bin/bash
 set -e
 
-PYTHON="$(which python)"
+get_curr_dir() {
+  local curr_dir=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+  echo $curr_dir
+}
+
+export UTILS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+export YQ="${UTILS_DIR}/yaml_parser eval"
 
 # These colors are not reflected in Slurm output file.
 colblk='' #'\033[0;30m' # Black - Regular
 colred='' #'\033[0;31m' # Red
 colblu='' #\033[0;32m' # Blue
 colylw='' #\033[0;33m' # Yellow
-colgrn='' #\033[0;34m' # Green
+colgrn='' #'\033[0;34m' # Green
 colpur='' #\033[0;35m' # Purple
 colwht='' #\033[0;97m' # White
 colrst='' #\033[0m'    # Text Reset
@@ -21,18 +27,17 @@ dbg_lvl=3
 err_lvl=4
 
 logger_verbosity="${logger_verbosity:-"1"}"
-
+logger() {
+  if [[ "$logger_verbosity" -ge "$logging_lvl" ]] || [[ "$logging_lvl" == "4" ]]; then
+    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
+    echo -e "[$timestamp] $@"
+  fi
+}
 logger_info() { logging_lvl=$inf_lvl logger "[${colgrn}INFO${colrst} ] $@"; }
 logger_warn() { logging_lvl=$wrn_lvl logger "[${colylw}WARN${colrst} ] $@"; }
 logger_debug() { logging_lvl=$dbg_lvl logger "[${colblu}DEBUG${colrst}] $@"; }
 logger_error() { logging_lvl=$err_lvl logger "[${colred}ERROR${colrst}] $@"; }
 
-logger() {
-  if [[ "$logger_verbosity" -ge "$logging_lvl" ]] || [[ "$logging_lvl" == "4" ]]; then
-    timestamp=$(date '+%Y-%m-%d %H:%M:%S')
-    echo -e "$timestamp $@"
-  fi
-}
 ###################################################################################
 
 run_remote_cmd() {
@@ -58,8 +63,13 @@ get_slurm_jobtime() {
 load_modules() {
   modules=$@
   for module_i in $modules; do
-    if ! module is-loaded $module_i; then
-      module load $module_i >/dev/null 2>&1
+    if $(module is-avail $module_i); then
+      module is-loaded $module_i || {
+        module load $module_i >/dev/null 2>&1
+      }
+    else
+      logger_error "Unable to load module $module_i"
+      exit 1
     fi
   done
 }
@@ -164,24 +174,24 @@ stop_if_needed() {
   fi
 }
 
-yaml() {
-  if [[ "$1" == "" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-    echo "Usage: yaml <my-yaml-file.yaml> <key>"
-    echo "Description:"
-    echo "  key : \"['keystring']\""
-  else
-    #logger_debug "Option provided to  yaml file: $2"
-    $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$1'))$2;print('\n'.join(str(i) for i in yaml_data) if type(yaml_data)==list else yaml_data);"
-  fi
-}
+# yaml() {
+#   if [[ "$1" == "" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
+#     echo "Usage: yaml <my-yaml-file.yaml> <key>"
+#     echo "Description:"
+#     echo "  key : \"['keystring']\""
+#   else
+#     #logger_debug "Option provided to  yaml file: $2"
+#     $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$1'))$2;print('\n'.join(str(i) for i in yaml_data) if type(yaml_data)==list else yaml_data);"
+#   fi
+# }
 
-yaml_append() {
-  local OPT_PATH=$1
-  local OPT_VAL=$2
-  local YAML_FILE=$3
+# yaml_append() {
+#   local OPT_PATH=$1
+#   local OPT_VAL=$2
+#   local YAML_FILE=$3
 
-  $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$YAML_FILE'));yaml_data$OPT_PATH='$OPT_VAL';yaml.dump(yaml_data, open('$YAML_FILE', 'w'), default_flow_style=False);"
-}
+#   $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$YAML_FILE'));yaml_data$OPT_PATH='$OPT_VAL';yaml.dump(yaml_data, open('$YAML_FILE', 'w'), default_flow_style=False);"
+# }
 
 get_mem_per_node() {
   #echo "$(scontrol show job $SLURM_JOBID | grep 'mem' | sed 's/.*MinMemoryNode=\(.*\),node.*/\1/g')"
@@ -194,8 +204,7 @@ print_experiment_info() {
     logger_info "   Pipeline type: $PIPELINE_TYPE"
     logger_info "   Run: $RUN_NUM"
     logger_info "   Number of nodes: 1"
-    logger_info "   Parallelism: $(yaml ${CONF_FILE} '["experiment_setup"]["parallelism_per_node"]')"
-    logger_info "   Total memory per node: $(yaml ${CONF_FILE} '["local_setup"]["mem_per_node"]')"
+    logger_info "   Parallelism: $($YQ '.stream_processor.worker.parallelism' ${CONF_FILE})"
   else
     logger_info "Experiment info:"
     logger_info "   Slurm Job ID: $SLURM_JOBID"

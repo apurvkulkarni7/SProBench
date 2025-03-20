@@ -1,47 +1,76 @@
-# Framework setup
-# Default values
-#export GIT=${GIT:-git}
-#export MAKE=${MAKE:-make}
+#!/bin/bash
 set -e
 
-FRAMEWORK=$1
-CONF_FILE_RUN=$2
+check_file CONF_FILE_RUN
+check_var SPB_SYSTEM
+check_var FRAMEWORK
 
-if is_hpc; then
+case ${SPB_SYSTEM} in
 
-  module purge > /dev/null 2>&1 
+localmachine)
 
-  #module use /data/horse/ws/apku868a-frameworks/rapids/modules/all/Compiler/GCC/13.2.0/
-  #module use /data/horse/ws/apku868a-frameworks/rapids/modules/all/Core
+  export JAVA_HOME=$($YQ '.frameworks.java.local_setup.path' $CONF_FILE_RUN)
+  export MVN_HOME=$($YQ '.frameworks.maven.local_setup.path' $CONF_FILE_RUN)
+  export KAFKA_HOME=$($YQ '.frameworks.kafka.local_setup.path' $CONF_FILE_RUN)
+
+  export ${FRAMEWORK^^}_HOME=$($YQ ".frameworks.${FRAMEWORK,,}.local_path" $CONF_FILE_RUN)
+  ;;
+
+slurm_interactive | slurm_batch)
+
+  # Reset modules
+  module purge >/dev/null 2>&1
+  module reset >/dev/null 2>&1
+
+  # Use moudles installed on custom path
+  CUSTOM_MODULE_PATHS=$(eval echo $($YQ '.frameworks.custom_module_path | .[]' $CONF_FILE_RUN))
+  for CUSTOM_PATH_i in $CUSTOM_MODULE_PATHS; do
+    logger_info "Adding custom module path to the MODULEPATH"
+    for i in $(find $CUSTOM_PATH_i -type d); do
+      module use $i
+    done
+  done
   
-  load_modules "release/24.04"  "GCC/13.2.0" ""
-  load_modules "Java/11.0.20" "Maven/3.9.6" "Kafka"
+  logger_info "Loading core modules"
+  CORE_FRAMEWORKS="java maven kafka"
+  for CORE_FRAMEWORK_i in $CORE_FRAMEWORKS; do
+    load_modules \
+      $($YQ '.frameworks["'"${CORE_FRAMEWORK_i}"'"].slurm_setup.dependent_modules[]' $CONF_FILE_RUN)
 
-  export JAVA=$JAVA_HOME/bin/java
-  export MVN=$(which mvn)
-  
-  if [[ "$FRAMEWORK" == "FLINK" ]] || [[ "$FRAMEWORK" == "CHECK" ]]; then
-    load_modules "Flink"
-    export FLINK_HOME=$FLINK_ROOT_DIR
-  fi  
+    load_modules \
+      $($YQ '.frameworks["'"${CORE_FRAMEWORK_i}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
+  done
 
+  # Load stream processing framework
+  logger_info "Loading stream processing framework (${FRAMEWORK,,}) module."
+  load_modules $($YQ '.frameworks["'"${FRAMEWORK,,}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
 
-else
-
-  export MVN=$(yaml $CONF_FILE_RUN '["local_setup"]["frameworks"]["maven_home"]')/bin/mvn
-  export JAVA=${JAVA:-$JAVA_HOME/bin/java}
-  export KAFKA_HOME="$(yaml $CONF_FILE_RUN '["local_setup"]["frameworks"]["kafka_home"]')"
-  if [[ "$FRAMEWORK" == "FLINK" ]] || [[ "$FRAMEWORK" == "CHECK" ]]; then
-    export FLINK_HOME="$(yaml $CONF_FILE_RUN '["local_setup"]["frameworks"]["flink_home"]')"
+  # Set some environment variables
+  if [[ -z $JAVA_HOME ]]; then
+    logger_error "Java module not loaded correctly."
+    exit 1
   fi
-  if [[ "$FRAMEWORK" == "SPARK" ]] || [[ "$FRAMEWORK" == "CHECK" ]]; then
-    export SPARK_HOME="$(yaml $CONF_FILE_RUN '["local_setup"]["frameworks"]["spark_home"]')"
+  if command which mvn >/dev/null 2>&1; then
+    MVN_HOME=$(dirname $(dirname $(which mvn)))
+  else
+    logger_error "Maven module not loaded correctly."
   fi
   
-fi
+  [[ $(check_var KAFKA_HOME) ]] && logger_error "Kafka module not available." && exit 1
+  
+  case ${FRAMEWORK,,} in
+  flink)
+    ((check_var FLINK_ROOT_DIR 2>&1 > /dev/null) || (check_var FLINK_HOME 2>&1 >/dev/null)) || \
+      { logger_error "Flink module not loaded correctly." && exit 1; }
+    export FLINK_HOME=${FLINK_HOME:-$FLINK_ROOT_DIR}
+    ;;
+  spark)
+    check_var SPARK_HOME || logger_error "Spark module not loaded correctly." && exit 1
+    ;;
+  esac
+  ;;
+esac
 
-# echo here
-# check_file JAVA
-# check_file MVN
-# check_directory KAFKA_HOME
-# check_directory FLINK_HOME
+# Set core environment variables
+export JAVA="${JAVA_HOME}/bin/java"
+export MVN="${MVN_HOME}/bin/mvn"

@@ -1,11 +1,11 @@
 #!/bin/bash
 set -e
 
-BENCHMARK_DIR=$(dirname "$(readlink -f "$0")")
+BENCHMARK_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
+source "${BENCHMARK_DIR}/utils/utils.sh"
 
-
-source "$BENCHMARK_DIR/utils/parse_input_args.sh" $@
-source $BENCHMARK_DIR/utils/init.sh
+source "${BENCHMARK_DIR}/utils/parse_input_args.sh" $@
+logger_verbosity=$($YQ '.logging_level' $INIT_CONF_FILE)
 
 if [[ "$SETUP" == "true" ]]; then
   exit 0
@@ -29,7 +29,7 @@ for FRAMEWORK_i in $FRAMEWORK_LIST; do
           source "$BENCHMARK_DIR"/utils/setup_batch_job_parameters.sh $INIT_CONF_FILE
 
           #Setup experiment directory structure
-          if [[ "$FRAMEWORK_i" == "FLINK" ]]; then
+          if [[ "$FRAMEWORK_i" == "(FLINK|SPARK_STREAMING|KAFKASTREAM)" ]]; then
             RUN_DIR_NAME="W${NUM_WORKERS_i}_C${NUM_CPU_WORKERS_i}_L${GENERATOR_LOAD_HZ_i}/${PROCESSING_TYPE}/R${RUN_i}"
           elif [[ "$FRAMEWORK_i" == "GENERATOR" ]]; then
             check_var GENERATOR_NUM
@@ -38,6 +38,7 @@ for FRAMEWORK_i in $FRAMEWORK_LIST; do
             RUN_DIR_NAME="G${GENERATOR_NUM}_C${GENERATOR_CPU_NUM}_M${MEM_GENERATOR}_L${GENERATOR_LOAD_HZ_i}_P${NUM_CPU_WORKERS_i}/R${RUN_i}"
           fi
           LOG_DIR_RUN="${LOG_DIR_MAIN}/${RUN_DIR_NAME}"
+          mkdir -p $LOG_DIR_RUN
 
           # Proceed based on the system
           source ${BENCHMARK_DIR}/utils/system_handler.sh \
