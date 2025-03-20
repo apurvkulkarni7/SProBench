@@ -8,7 +8,6 @@
     Streaming Processing Benchmark for High Performance Computing
   </h1>
   
-
   <p align="center">
 
   <br />
@@ -26,9 +25,9 @@
   <ol>
     <li>
       <a href="#about-the-project">About The Project</a>
-      <ul>
-        <li><a href="#built-with">Built With</a></li>
-      </ul>
+    </li>
+    <li>
+      <a href="#software-stack">Software Stack</a>
     </li>
     <li>
       <a href="#getting-started">Getting Started</a>
@@ -55,32 +54,46 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This is benchmark designed to understand performance of streaming framework on Slurm based HPC system. This is designed keeping all the good practices used in modern benchmarks.
-
-### Why do we need this benchmark ?
-- This benchmark designed to be run on SLURM based system. Such benchmarks are curretnly very old or don't consider the updated version of frameworks
-- [WIP] This benchmark consists of not only Java based frameworks but also C++ based frameworks. Such versitality is not suported in any other benchmarks
-- [WIP] This benchmark supports differen loading conditions (constant, periodic and burst) which is currently not supported by many benchmarks
-- Can be easily integrated with monitoring tools used by ZIH HPC systems (in post-processing phase).
-- And many more...
-
+This is benchmark designed to understand performance of different streaming frameworks on Slurm based HPC systems.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
-### Built With
+## Software Stack
 
-Following frameworks are used to build the benchmark
+Following software and frameworks are used to build the benchmark
 
-[![Java][Java-image]][Java-url]\
-[![Apache Maven][Maven-image]][Maven-url]\
-[![Apache Flink][Flink-image]][Flink-url]\
-[![Apache Spark][Spark-image]][Spark-url][WIP]\
-[![Apache Kafka][Kafka-image]][Kafka-url][WIP]\
-[![Windflow][WindFlow-image]][WindFlow-url][WIP]
+### Core software
+
+| Technology | Version  | Description |
+| --- |  --- | --- | 
+| [![Java][Java-image]][Java-url] | 11 | Core programming language |
+|[![Apache Maven][Maven-image]][Maven-url] | 3.9.6 | Build automation tool for Java application |
+
+### Message broker
+
+| Technology | Version  | Description |
+| --- |  --- | --- | 
+|[![Apache Kafka][Kafka-image]][Kafka-url] | 3.6.1 | Message broker for distributed streaming and event-driven architectures |
+
+### Streaming software
+
+| Technology | Version  | Description | Status |
+| --- |  --- | --- | --- |
+| [![Apache Flink][Flink-image]][Flink-url] | 1.19.1 | Distributed streaming engine | Available |
+|[![Apache Spark][Spark-image]][Spark-url] | 3.5.0 | Unified streaming engine | Available |
+| [![Apache Kafka][Kafka-image]][Kafka-url] | 3.6.1 | Distributed streaming platform | Available |
+| [![Windflow][WindFlow-image]][WindFlow-url] | 4.2.2 | | [WIP] |
+
+### System support
+
+| System | Os/Software version | Description | Status |
+| --- |  --- | --- | --- |
+| Local machine | Linux |  | Available |
+| SLURM based HPC | Linux/slurm-23.03 |  | Available |
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
-
 
 
 <!-- GETTING STARTED -->
@@ -195,15 +208,13 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the **MIT License**. See [LICENSE](./LICENSE) for more information.
+Distributed under the **GNU GENERAL PUBLIC LICENSE V3**. See [LICENSE](./LICENSE) for more information.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 
 <!-- ACKNOWLEDGMENTS -->
 ## Acknowledgments
-
-<!-- Use this space to list resources you find helpful and would like to give credit to. I've included a few of my favorites to kick things off! -->
 
 * [ScaDS.AI](https://scads.ai)
 
@@ -225,15 +236,15 @@ Distributed under the **MIT License**. See [LICENSE](./LICENSE) for more informa
 [license-shield]: https://img.shields.io/github/license/othneildrew/Best-README-Template.svg?style=for-the-badge
 [license-url]: https://github.com/othneildrew/Best-README-Template/blob/master/LICENSE.txt
 
-[Java-image]: https://img.shields.io/badge/Java-11.0.20-orange?style=for-the-badge&logo=java
+[Java-image]: https://img.shields.io/badge/Java-grey?style=for-the-badge&logo=java
 [Java-url]: https://www.java.com/
-[Maven-image]: https://img.shields.io/badge/Apache_Maven-3.9.6-blue?style=for-the-badge&logo=apachemaven
+[Maven-image]: https://img.shields.io/badge/Apache_Maven-grey?style=for-the-badge&logo=apachemaven
 [Maven-url]: https://maven.apache.org/
-[Flink-image]: https://img.shields.io/badge/Apache_Flink-1.17.1-magenta?style=for-the-badge&logo=apacheflink
+[Flink-image]: https://img.shields.io/badge/Apache_Flink-grey?style=for-the-badge&logo=apacheflink
 [Flink-url]: https://flink.apache.org/
-[Spark-image]: https://img.shields.io/badge/Apache_Spark-3.5.0-red?style=for-the-badge&logo=apachespark
+[Spark-image]: https://img.shields.io/badge/Apache_Spark-grey?style=for-the-badge&logo=apachespark
 [Spark-url]: https://spark.apache.org/
-[Kafka-image]: https://img.shields.io/badge/Apache_Kafka-3.6.1_scala_2.13-white?style=for-the-badge&logo=apachekafka
+[Kafka-image]: https://img.shields.io/badge/Apache_Kafka-grey?style=for-the-badge&logo=apachekafka
 [Kafka-url]: https://kafka.apache.org/
-[WindFlow-image]: https://img.shields.io/badge/WindFlow-4.0.0-blue?style=for-the-badge&logo=windflow
+[WindFlow-image]: https://img.shields.io/badge/WindFlow-grey?style=for-the-badge&logo=windflow
 [WindFlow-url]: https://github.com/ParaGroup/WindFlow
