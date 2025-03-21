@@ -4,7 +4,8 @@
 #
 # The following settings are used to configure the benchmarking process.
 #
-# - Create the logging directories in the same location instead of at /tmp location
+# - Create the logging directories in the same location instead of at "/tmp"
+#   location
 # - debug_mode: To create the temporary logging files at the specified location
 #   instead of "/tmp"
 # - logging_level: To set the logging level in the benchmark
@@ -64,7 +65,8 @@ generator:
 # - parallelism_per_worker: The parallelism per worker. By default 1 CPU per
 #   parallelism pipeline is used.
 # - num_cpus_master: The number of CPUs allocated to the master node.
-# - num_cpus_spare: The number of spare CPUs for other auxiliary processes on all nodes.
+# - num_cpus_spare: The number of spare CPUs for other auxiliary processes on
+#   all nodes.
 # - num_workers: The number of worker nodes.
 # - mem_node_master: The memory allocated to the master node in GB.
 # - mem_node_worker: The memory allocated to each worker node in GB.
@@ -130,7 +132,7 @@ kafka:
 #     added to MODULEPATH.
 frameworks:
   java:
-    version: 11
+    version: 11.0.2
     local_setup:
       path: default
     slurm_setup:
@@ -162,7 +164,7 @@ frameworks:
         - depency2
       path: default
   kafka:
-    version:
+    version: 3.6.1
     local_setup:
       path: default
     slurm_setup:
@@ -173,7 +175,7 @@ frameworks:
         - depency2
       path: default
   spark:
-    version:
+    version: 3.5.3
     local_setup:
       path: default
     slurm_setup:
@@ -193,7 +195,8 @@ frameworks:
 # benchmarking process.
 #
 # - project: The project name for the HPC job.
-# - exclusive_jobs: A flag to indicate if jobs are exclusive. Should be used inside double quotes
+# - exclusive_jobs: A flag to indicate if jobs are exclusive. Should be used 
+#   inside double quotes
 # - chained_jobs: A flag to indicate if jobs are chained or run independently.
 # - multithreading: A flag to indicate if multithreading is enabled.
 slurm_setup:

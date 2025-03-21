@@ -7,9 +7,11 @@ get_curr_dir() {
 }
 
 export UTILS_DIR="$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")"
+
+# Defining yaml parser function
 export YQ="${UTILS_DIR}/yaml_parser eval"
 
-# These colors are not reflected in Slurm output file.
+#Note: These colors are not reflected in Slurm output file.
 colblk='' #'\033[0;30m' # Black - Regular
 colred='' #'\033[0;31m' # Red
 colblu='' #\033[0;32m' # Blue
@@ -18,14 +20,12 @@ colgrn='' #'\033[0;34m' # Green
 colpur='' #\033[0;35m' # Purple
 colwht='' #\033[0;97m' # White
 colrst='' #\033[0m'    # Text Reset
-
-### verbosity levels
+# verbosity levels
 silent_lvl=0
 inf_lvl=1
 wrn_lvl=2
 dbg_lvl=3
 err_lvl=4
-
 logger_verbosity="${logger_verbosity:-"1"}"
 logger() {
   if [[ "$logger_verbosity" -ge "$logging_lvl" ]] || [[ "$logging_lvl" == "4" ]]; then
@@ -38,7 +38,6 @@ logger_warn() { logging_lvl=$wrn_lvl logger "[${colylw}WARN${colrst} ] $@"; }
 logger_debug() { logging_lvl=$dbg_lvl logger "[${colblu}DEBUG${colrst}] $@"; }
 logger_error() { logging_lvl=$err_lvl logger "[${colred}ERROR${colrst}] $@"; }
 
-###################################################################################
 
 run_remote_cmd() {
   host=$1
@@ -218,10 +217,6 @@ print_experiment_info() {
 
 round_off() {
   echo $1 | awk '{print int($1+0.5)}'
-}
-
-get_timestamp() {
-  echo $(date +%Y%m%d%H%M%S)
 }
 
 fetch_untar_file() {
