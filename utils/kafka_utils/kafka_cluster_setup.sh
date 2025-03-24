@@ -15,7 +15,8 @@ export KAFKA_CONF_DIR=$2
 LOG_DIR=$3
 
 CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-source "${CURR_DIR}/../init.sh"
+
+source "${UTILS_DIR}/utils.sh"
 
 if [[ $SPB_SYSTEM =~ slurm_* ]]; then  
   load_modules "release/24.04" "GCC/13.2.0" "Kafka/3.6.1-scala-2.13"
