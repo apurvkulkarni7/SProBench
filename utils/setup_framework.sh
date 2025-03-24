@@ -9,19 +9,15 @@ check_directory BENCHMARK_DIR
 case ${SPB_SYSTEM} in
 
 localmachine)
+  # Loading core frameworks
+  CORE_FRAMEWORKS="java maven kafka"
+  for CORE_FRAMEWORK_i in $CORE_FRAMEWORKS; do
+    CORE_FRAMEWORK_HOME=$($YQ '.frameworks.'${CORE_FRAMEWORK_i,,}'.local_setup.path' $INIT_CONF_FILE)
+    if [[ ${CORE_FRAMEWORK_HOME} == 'default' ]]; then CORE_FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${CORE_FRAMEWORK_i,,}"; fi
+    export ${CORE_FRAMEWORK_i^^}_HOME=${CORE_FRAMEWORK_HOME}
+  done
 
-  JAVA_HOME=$($YQ '.frameworks.java.local_setup.path' $CONF_FILE_RUN)
-  if [[ $JAVA_HOME == 'default' ]]; then JAVA_HOME="${BENCHMARK_DIR}/frameworks/java"; fi
-  export JAVA_HOME
-  
-  MAVEN_HOME=$($YQ '.frameworks.maven.local_setup.path' $CONF_FILE_RUN)
-  if [[ $MAVEN_HOME == 'default' ]]; then MAVEN_HOME="${BENCHMARK_DIR}/frameworks/maven"; fi
-  export MAVEN_HOME
-  
-  KAFKA_HOME=$($YQ '.frameworks.kafka.local_setup.path' $CONF_FILE_RUN)
-  if [[ $KAFKA_HOME == 'default' ]]; then KAFKA_HOME="${BENCHMARK_DIR}/frameworks/kafka"; fi
-  export KAFKA_HOME
-  
+  # loading stream processing
   FRAMEWORK_HOME=$($YQ '.frameworks.'${FRAMEWORK,,}'.local_setup.path' $CONF_FILE_RUN)
   if [[ $FRAMEWORK_HOME == 'default' ]]; then FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${FRAMEWORK,,}";  fi
   export ${FRAMEWORK^^}_HOME=$FRAMEWORK_HOME

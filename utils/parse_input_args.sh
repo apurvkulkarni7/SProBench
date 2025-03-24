@@ -133,9 +133,12 @@ if [[ $HAS_COMPILE -eq 1 ]]; then
   source utils/utils.sh
   case $SPB_SYSTEM in
   localmachine)
-    MAVEN_HOME=$($YQ '.frameworks.maven.local_setup.path' $INIT_CONF_FILE)
-    echo $MAVEN_HOME
-    if [[ $MAVEN_HOME == 'default' ]]; then MAVEN_HOME="${BENCHMARK_DIR}/frameworks/maven"; fi
+    CORE_FRAMEWORKS="java maven"
+    for CORE_FRAMEWORK_i in $CORE_FRAMEWORKS; do
+      CORE_FRAMEWORK_HOME=$($YQ '.frameworks.'${CORE_FRAMEWORK_i,,}'.local_setup.path' $INIT_CONF_FILE)
+      if [[ ${CORE_FRAMEWORK_HOME} == 'default' ]]; then CORE_FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${CORE_FRAMEWORK_i,,}"; fi
+      export ${CORE_FRAMEWORK_i^^}_HOME=${CORE_FRAMEWORK_HOME}
+    done
     ;;
   slurm_interactive | slurm_batch)
     # Use moudles installed on custom path
