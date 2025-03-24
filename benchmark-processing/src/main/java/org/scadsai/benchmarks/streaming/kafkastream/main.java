@@ -10,7 +10,7 @@ import org.apache.kafka.streams.kstream.Produced;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class KafkaStreamProcessor {
+public class main {
     public static void main(String[] args) {
         // Set up the configuration properties
         Properties props = new Properties();
