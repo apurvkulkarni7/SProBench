@@ -81,7 +81,7 @@ pid_match() {
 create_pid_file() {
   process_name=$1
   pid_file=$2
-  jps | grep "$process_name" | awk '{print $1}' >"${pid_file}"
+  $JAVA_HOME/bin/jps | grep "$process_name" | awk '{print $1}' >"${pid_file}"
 }
 
 # Function to check if a process is alive or dead

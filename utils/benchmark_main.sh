@@ -193,12 +193,12 @@ run() {
     run "START_LOAD"
     run "START_JMX_KAFKA_COLLECTOR" "eventsIn"
     run "START_JMX_KAFKA_COLLECTOR" "eventsOut"
-    jps > $LOG_DIR_RUN_LOG/running_java_proceses
+    $JAVA_HOME/bin/jps > $LOG_DIR_RUN_LOG/running_java_proceses
     logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
     sleep "${BENCHMARK_RUNTIME_MIN}m"
     logger_info "Completed running benchmark for $BENCHMARK_RUNTIME_MIN minutes."
     echo "==" >> $LOG_DIR_RUN_LOG/running_java_proceses
-    jps >> $LOG_DIR_RUN_LOG/running_java_proceses
+    $JAVA_HOME/bin/jps >> $LOG_DIR_RUN_LOG/running_java_proceses
     #run "STOP_FLINK_PROCESSING"
     run "STOP_FLINK"
     #run "STOP_JMX_COLLECTOR"

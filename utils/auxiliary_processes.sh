@@ -48,7 +48,7 @@ run_jmx_collector() {
   sleep 5s
 
   # Check if the application is running or not
-  local jmx_check_cmd="jps | grep -q \$(cat $jmx_pid_file)"
+  local jmx_check_cmd="$JAVA_HOME/bin/jps | grep -q \$(cat $jmx_pid_file)"
   #local jmx_check_cmd="pgrep -U ${USER} -F ${jmx_pid_file} > /dev/null 2>&1"
 
   if run_remote_cmd "${host}" "${jmx_check_cmd}" > /dev/null ; then
@@ -84,7 +84,7 @@ monitor_kafka_broker() {
         fi
 
         # Check if Kafka broker is alive using SSH
-        if ! srun --overlap --nodelist="$kafka_broker" --jobid="$slurm_jobid" /bin/bash -c "jps" | grep -q -E "Kafka|QuorumPeerMain"; then
+        if ! srun --overlap --nodelist="$kafka_broker" --jobid="$slurm_jobid" /bin/bash -c "$JAVA_HOME/bin/jps" | grep -q -E "Kafka|QuorumPeerMain"; then
             echo "Kafka broker is dead or unreachable. Terminating Slurm job $slurm_jobid."
             echo "FAILED" > $status_file
             #cp $LOG_DIR_RUN $LOG_DIR_RUN_SAVE

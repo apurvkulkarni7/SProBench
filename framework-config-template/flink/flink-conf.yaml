@@ -260,7 +260,6 @@ rest.bind-address: FLINK_MASTER_HOSTNAME
 # taskmanager.memory.network.max: 1gb
 # taskmanager.network.memory.min: 32mb
 # taskmanager.network.memory.max: 1g
-taskmanager.network.memory.fraction: 0.2
 
 #==============================================================================
 # Flink Cluster Security Configuration
