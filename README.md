@@ -92,46 +92,54 @@ Following software and frameworks are used to build the benchmark
 | Local machine | Linux |  | Available |
 | SLURM based HPC | Linux/slurm-23.03 |  | Available |
 
+<p align="right">(<a href="#readme-top">back to top</a>)</p>
+
+## Getting Started
+
+### Prerequisites and Installation
+
+You can setup the benchmark on required syetem and also check if the compatible 
+frameworks are installed using:
+```sh
+./runner.sh --setup --system_type localmachine
+```
+You can use the provided default configuration [file](./default_config.yaml) for
+the inspiration for creating own configuration file.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
-
-<!-- GETTING STARTED -->
-## Getting Started
-
-### Prerequisites
-
-You can check if the compatible frameworks are installed using:
-```sh
-./runner.sh -t CHECK -c <your-config-file>
-```
-You can use the provided default configuration [file](./default_config.yaml) for the inspiration for creating own configuration file.
-
-### Installation [WIP]
-
-<!-- USAGE -->
 ## Usage
 
 You can use `runner.sh` scritp to start the benchmark in following ways:
 ```bash
-$ ./runner.sh --help
-
-Usage: runner.sh -t <TYPE> [-d DIRECTORY] [-c CONFIG_FILE] [-m START|STOP]
+$ ./runner.sh -h
+Usage: runner.sh [OPTIONS]
 
 Description:
-This script starts or stops various types of applications based on the specified type, directory, and configuration file.
+  The entry point script that controls the installation and execution
+  of the benchmark.
 
 Options:
--t (required): The type of application to start or stop. Possible values: GENERTOR, FLINK, SPARK-STREAMING, KAFKASTREAMING
--d (optional): The directory where experiment data will be stored
--c (optional): The path to the experiment main configuration file
--m (optional): The execution mode. Possible values: START(default), STOP
+  --setup             Setup the benchmark to install required software
+                      Requires --system_type and --conf_file
+  --system_type, -s   The system type where the benchmark is running
+                      (localmachine, slurm_interactive,slurm_batch)
+  --output_dir, -o    The directory where benchmark output will be 
+                      stored
+  --conf_file, -c     The path to the experiment main configuration
+                      file
+
+Usage examples:
+  Setup : runner.sh --setup --system_type <type> --conf_file <file>
+  Run   : runner.sh --system_type <type> [options]
 
 ```
 
-Example:
+Once the setup is complete, edit the configuration file as per requirement. Then
+the benchmark can be started as follows (minimal working example):
+
 ```bash
-./runner.sh -t FLINK -c default_config.yaml -d ./output
+./runner.sh --system_type localmachine
 ```
 
 <!-- BENCHMARK -->
@@ -140,47 +148,25 @@ Example:
 ### Workflow
 Benhcmark consist of following workflow:
 
-```mermaid
-graph LR
-  A(Data Generator) -- (0) --> KFKTOPIC(Kafka Topic)
-  KFKTOPIC -- (1) --> FLINK(Apache Flink)
-  KFKTOPIC -- (1) --> SPARK(Apache Spark)
-  KFKTOPIC -- (1) --> KFKSTRM(Apache KafkaStream)
-  FLINK -- (2) --> KFKTOPIC_(Kafka Topic)
-  SPARK -- (2)--> KFKTOPIC_
-  KFKSTRM -- (2)--> KFKTOPIC_
+![](./docs_resources/benchmark_workflow.png)
 
-  style A fill:#8a6401, stroke:#000000;
-  style KFKTOPIC fill:#009a36, stroke:#000000;
-  style FLINK fill:#d1008b, stroke:#000000;
-  style SPARK fill:#760000, stroke:#000000;
-  style KFKSTRM fill:#001a85, stroke:#000000;
-  style KFKTOPIC_ fill:#009a36, stroke:#000000;
-  
-  x[
-    0 : timestamp, sensorid, temperature
-    1 : timestamp, sensorid, temperature
-    2 : timestamp, output
-  ]
-```
+and consist of following three pipelines
 
-### Data Loading:
-The data generator supports following loading types:
-1. Constant data generation
-2. Periodic data generation [WIP]
-3. Burst data generation [WIP]
+![](./docs_resources/benchmark_pipeline.png)
+
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap
-- [ ] Complete benchmark with Apache Flink
-  - [ ] Inlcude different processing patterns
-    - [ ] CPU intensive
-    - [ ] Memory intensive
-- [ ] Add multiple loading conditions
-- [ ] Add a method to collect metrics on local machine
-- [ ] Integrate PIKA and MetriQ for metric collection and postprocessing
+- [ ] Complete support for 
+  - [ ] Windflow
+  - [ ] Apache Storm
+  - [ ] Hazelcast
+  - [ ] Nebulastream
+  - [ ] Apache Beam
+- [ ] Add support for other sytems like Torch
+- [ ] Add support for other data processing pipelines that are ML/DL focussed
 
 
 See the open issues for a full list of proposed features (and known issues).
