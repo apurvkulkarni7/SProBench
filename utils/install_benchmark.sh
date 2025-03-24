@@ -111,6 +111,7 @@ setup_java() {
     fi
     ;;
   esac
+  export JAVA_HOME
   
   # Verify Java installation
   $JAVA_HOME/bin/java -version >/dev/null 2>&1
@@ -286,7 +287,7 @@ download_frameworks() {
   fi
   tar -zxf "$ARCHIVE_FILE" -C "${FRAMEWORK_PATH}"
   FRAMEWORK_TMP_DIR=$(find "${FRAMEWORK_PATH}/"* -maxdepth 1 -type d -name "${FRAMEWORK_NAME}*")
-  mv "${FRAMEWORK_TMP_DIR}/"* "${FRAMEWORK_PATH}/"
+  cp -r "${FRAMEWORK_TMP_DIR}/"* "${FRAMEWORK_PATH}/"
 }
 
 setup_frameworks() {
@@ -492,7 +493,7 @@ case $SPB_SYSTEM in
 localmachine)
   if [ $SETUP_JAVA -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_java; fi
   if [ $SETUP_MAVEN -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_maven; fi
-  if [ $SETUP_VENV -eq 1 ] || [ $SETUP_VENV -eq 1 ]; then setup_python; fi
+  if [ $SETUP_VENV -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_python; fi
   if [ $SETUP_KAFKA -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_frameworks "kafka"; fi
   if [ $SETUP_FLINK -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_frameworks "flink"; fi
   if [ $SETUP_SPARK -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_frameworks "spark"; fi
