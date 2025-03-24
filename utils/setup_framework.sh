@@ -4,16 +4,28 @@ set -e
 check_file CONF_FILE_RUN
 check_var SPB_SYSTEM
 check_var FRAMEWORK
+check_directory BENCHMARK_DIR
 
 case ${SPB_SYSTEM} in
 
 localmachine)
 
-  export JAVA_HOME=$($YQ '.frameworks.java.local_setup.path' $CONF_FILE_RUN)
-  export MVN_HOME=$($YQ '.frameworks.maven.local_setup.path' $CONF_FILE_RUN)
-  export KAFKA_HOME=$($YQ '.frameworks.kafka.local_setup.path' $CONF_FILE_RUN)
-
-  export ${FRAMEWORK^^}_HOME=$($YQ ".frameworks.${FRAMEWORK,,}.local_path" $CONF_FILE_RUN)
+  JAVA_HOME=$($YQ '.frameworks.java.local_setup.path' $CONF_FILE_RUN)
+  if [[ $JAVA_HOME == 'default' ]]; then JAVA_HOME="${BENCHMARK_DIR}/frameworks/java"; fi
+  export JAVA_HOME
+  
+  MAVEN_HOME=$($YQ '.frameworks.maven.local_setup.path' $CONF_FILE_RUN)
+  if [[ $MAVEN_HOME == 'default' ]]; then MAVEN_HOME="${BENCHMARK_DIR}/frameworks/maven"; fi
+  export MAVEN_HOME
+  
+  KAFKA_HOME=$($YQ '.frameworks.kafka.local_setup.path' $CONF_FILE_RUN)
+  if [[ $KAFKA_HOME == 'default' ]]; then KAFKA_HOME="${BENCHMARK_DIR}/frameworks/kafka"; fi
+  export KAFKA_HOME
+  
+  FRAMEWORK_HOME=$($YQ '.frameworks.'${FRAMEWORK,,}'.local_setup.path' $CONF_FILE_RUN)
+  if [[ $FRAMEWORK_HOME == 'default' ]]; then FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${FRAMEWORK,,}";  fi
+  export ${FRAMEWORK^^}_HOME=$FRAMEWORK_HOME
+  
   ;;
 
 slurm_interactive | slurm_batch)

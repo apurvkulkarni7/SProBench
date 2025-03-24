@@ -173,27 +173,7 @@ stop_if_needed() {
   fi
 }
 
-# yaml() {
-#   if [[ "$1" == "" ]] || [[ "$1" == "--help" ]] || [[ "$1" == "-h" ]]; then
-#     echo "Usage: yaml <my-yaml-file.yaml> <key>"
-#     echo "Description:"
-#     echo "  key : \"['keystring']\""
-#   else
-#     #logger_debug "Option provided to  yaml file: $2"
-#     $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$1'))$2;print('\n'.join(str(i) for i in yaml_data) if type(yaml_data)==list else yaml_data);"
-#   fi
-# }
-
-# yaml_append() {
-#   local OPT_PATH=$1
-#   local OPT_VAL=$2
-#   local YAML_FILE=$3
-
-#   $PYTHON -c "import yaml;yaml_data=yaml.safe_load(open('$YAML_FILE'));yaml_data$OPT_PATH='$OPT_VAL';yaml.dump(yaml_data, open('$YAML_FILE', 'w'), default_flow_style=False);"
-# }
-
 get_mem_per_node() {
-  #echo "$(scontrol show job $SLURM_JOBID | grep 'mem' | sed 's/.*MinMemoryNode=\(.*\),node.*/\1/g')"
   echo "$(scontrol show job $SLURM_JOBID | grep 'MinMemoryNode' | sed 's/.*MinMemoryNode=\(.*\)\s.*/\1/g')"
 }
 
@@ -409,4 +389,14 @@ get_cpus() {
 
   # Print the subset of CPUs
   echo $FINAL_CPU
+}
+
+source_benchmarkrc() {
+  local benchmark_rc_dir=$2
+  local system_type=$1
+  if [ -d $benchmarc_rc_dir ]; then
+    if [[ $system_type =~ localmachine ]]; then
+      source benchmark_rc1
+    fi
+  fi
 }

@@ -2,41 +2,7 @@
 # get_run_yaml_config.sh [FLINK|SPARK|KAFKA]
 set -e
 
-#FRAMEWORK="$1"
-
 check_file CONF_FILE_RUN
-
-# export GENERATOR_TYPE="$(yaml $CONF_FILE_RUN '["generator_type"]')"
-# export GENERATOR_LOAD_HZ="$(yaml $CONF_FILE_RUN '["generator_load_hz"]')"
-# export GENERATOR_LOAD_PER_GENERATOR_HZ="500000"
-# export GENERATOR_NUM="$(((GENERATOR_LOAD_HZ+GENERATOR_LOAD_PER_GENERATOR_HZ-1)/GENERATOR_LOAD_PER_GENERATOR_HZ))"
-# # Adjusting the load per generator based on calculated number of generator
-# export GENERATOR_LOAD_PER_GENERATOR_HZ="$((GENERATOR_LOAD_HZ/GENERATOR_NUM))"
-
-# export GENERATOR_CPU_NUM="$(yaml $CONF_FILE_RUN '["generator_cpu_num"]')"
-# export GENERATOR_THREAD_PER_CPU_NUM="$(yaml $CONF_FILE_RUN '["generator_threads_per_cpu_num"]')"
-# export GENERATOR_CPU_NUM_TOTAL=$((GENERATOR_CPU_NUM*GENERATOR_NUM))
-# export ONLY_DATA_GENERATOR="$(yaml $CONF_FILE_RUN '["only_data_generator"]')"
-# export GENERATOR_RECORD_SIZE_B="$(yaml $CONF_FILE_RUN '["record_size_bytes"]')"
-
-# export BENCHMARK_RUNTIME_MIN="$(yaml $CONF_FILE_RUN '["benchmark_runtime_min"]')"
-# export METRIC_LOGGING_INTERVAL_SEC="$(yaml $CONF_FILE_RUN '["metric_logging_interval_sec"]')"
-# export PROCESSING_TYPE="$(yaml $CONF_FILE_RUN '["processing_type"]')"
-
-# export KAFKA_SOURCE_TOPICS="$(yaml $CONF_FILE_RUN '["kafka_source_topics"]')"
-# export KAFKA_SINK_TOPICS="$(yaml $CONF_FILE_RUN '["kafka_sink_topics"]')"
-
-# export NUM_WORKERS="$(yaml $CONF_FILE_RUN '["num_workers"]')"
-
-# export NUM_CPU_MASTER="$(yaml $CONF_FILE_RUN '["num_cpus_master"]')"
-# export NUM_CPU_WORKERS="$(yaml $CONF_FILE_RUN '["parallelism_per_worker"]')"
-# export NUM_CPU_WORKERS_SPARE="$(yaml $CONF_FILE_RUN '["num_cpus_spare"]')"
-
-# MEM_MASTER="$(yaml $CONF_FILE_RUN '["mem_node_master"]')"
-# MEM_NODE_WORKER="$(yaml $CONF_FILE_RUN '["mem_node_worker"]')"
-# MEM_NODE_WORKER_SPARE="$(yaml $CONF_FILE_RUN '["mem_node_spare"]')"
-# MEM_GENERATOR="$(yaml $CONF_FILE_RUN '["generator_mem"]')"
-# MEM_GENERATOR_TOTAL=$((MEM_GENERATOR*GENERATOR_NUM))
 
 export GENERATOR_TYPE="$($YQ '.generator.type' $CONF_FILE_RUN)"
 export GENERATOR_LOAD_HZ="$($YQ '.generator.load_hz' $CONF_FILE_RUN)"

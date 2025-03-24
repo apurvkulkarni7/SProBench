@@ -2,9 +2,6 @@
 
 set -o pipefail
 set -o errtrace
-# set -o errexit
-#set -x
-#set -v
 set -e
 trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
 
