@@ -2,7 +2,7 @@
 <br />
 <div align="center">
   <a href="https://github.com/apurvkulkarni7/SProBench">
-    <img src="resources/logo.png" alt="Logo" width="1000">
+    <img src="doc_res/logo.png" alt="Logo" width="1000">
   </a>
   <h1 align="center">
     Streaming Processing Benchmark for High Performance Computing
@@ -148,11 +148,11 @@ the benchmark can be started as follows (minimal working example):
 ### Workflow
 Benhcmark consist of following workflow:
 
-![](./docs_resources/benchmark_workflow.png)
+![](./doc_res/benchmark_workflow.png)
 
 and consist of following three pipelines
 
-![](./docs_resources/benchmark_pipeline.png)
+![](./doc_res/benchmark_pipeline.png)
 
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
