@@ -13,7 +13,7 @@ import org.apache.logging.log4j.Logger;
 import org.scadsai.benchmarks.streaming.flink.sinks.sinkMain;
 import org.scadsai.benchmarks.streaming.flink.sources.sourceMain;
 import org.scadsai.benchmarks.streaming.flink.utils.MetricLoggerMap;
-import org.scadsai.benchmarks.streaming.flink.utils.OptionsGenerator;
+import org.scadsai.benchmarks.streaming.utils.OptionsGenerator;
 import org.scadsai.benchmarks.streaming.flink.utils.SetupStreamExecEnv;
 import org.scadsai.benchmarks.streaming.flink.utils.Transformations;
 

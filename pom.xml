@@ -11,7 +11,7 @@
 
     <modules>
         <module>benchmark-generator</module>
-        <module>benchmark-processing-flink</module>
+        <module>benchmark-processing</module>
         <module>benchmark-utils</module>
     </modules>
 
@@ -22,9 +22,11 @@
         <maven-shade-plugin-version>3.5.0</maven-shade-plugin-version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <kafka.version>3.2.0</kafka.version>
-        <flink.version>1.17.1</flink.version>
-        <scala.binary.version>2.12.0</scala.binary.version>
+        <kafka.version>3.6.1</kafka.version>
+        <flink.version>1.19.1</flink.version>
+        <spark.version>3.5.3</spark.version>
+        <scala.version>2.13.12</scala.version>
+        <scala.binary.version>2.13</scala.binary.version>
         <json.version>20220320</json.version>
         <simple.json.version>1.1.1</simple.json.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -60,41 +62,31 @@
                 <artifactId>log4j-core</artifactId>
                 <version>${log4j.version}</version>
             </dependency>
-            <!--            <dependency>-->
-            <!--                <groupId>org.slf4j</groupId>-->
-            <!--                <artifactId>slf4j-log4j12</artifactId>-->
-            <!--                <version>1.7.25</version>-->
-            <!--            </dependency>-->
             <!-- Apache Flink -->
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-java</artifactId>
                 <version>${flink.version}</version>
-                <!--                <scope>provided</scope>-->
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-clients</artifactId>
                 <version>${flink.version}</version>
-                <!--                <scope>provided</scope>-->
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-streaming-java</artifactId>
                 <version>${flink.version}</version>
-                <!--                <scope>provided</scope>-->
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-kafka</artifactId>
-                <version>${flink.version}</version>
-                <!--                <scope>provided</scope>-->
+                <version>3.3.0-1.19</version>
             </dependency>
             <dependency>
                 <groupId>org.apache.flink</groupId>
                 <artifactId>flink-connector-files</artifactId>
                 <version>${flink.version}</version>
-                <!--                <scope>provided</scope>-->
             </dependency>
             <!-- Apache Kafka -->
             <dependency>
@@ -117,11 +109,33 @@
                 <artifactId>kafka-clients</artifactId>
                 <version>${kafka.version}</version>
             </dependency>
+            <!-- Apache Kafka stream -->
             <dependency>
                 <groupId>org.apache.kafka</groupId>
                 <artifactId>kafka-streams</artifactId>
                 <version>${kafka.version}</version>
             </dependency>
+            <!-- Apache Spark Core -->
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-core_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+            </dependency>
+            <!-- Spark Streaming -->
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+            </dependency>
+            <!-- Spark Streaming Kafka Integration -->
+            <dependency>
+                <groupId>org.apache.spark</groupId>
+                <artifactId>spark-streaming-kafka-0-10_${scala.binary.version}</artifactId>
+                <version>${spark.version}</version>
+            </dependency>
+
+
+
             <dependency>
                 <groupId>org.json</groupId>
                 <artifactId>json</artifactId>
@@ -139,12 +153,7 @@
                     </exclusion>
                 </exclusions>
             </dependency>
-            <!-- To get ip address information -->
-<!--            <dependency>-->
-<!--                <groupId>com.maxmind.geoip2</groupId>-->
-<!--                <artifactId>geoip2</artifactId>-->
-<!--                <version>2.16.0</version>-->
-<!--            </dependency>-->
+
             <!-- To read YAML files -->
             <dependency>
                 <groupId>org.yaml</groupId>
@@ -170,6 +179,9 @@
                 <version>${commons-lang3}</version>
                 <scope>compile</scope>
             </dependency>
+
+
+
         </dependencies>
 
     </dependencyManagement>

@@ -17,7 +17,7 @@ import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-import static org.scadsai.benchmarks.streaming.flink.utils.Tools.roundOfThree;
+import static org.scadsai.benchmarks.streaming.utils.Tools.roundOfThree;
 
 public class Transformations {
     public static final Logger Logger = LogManager.getLogger("throughput");

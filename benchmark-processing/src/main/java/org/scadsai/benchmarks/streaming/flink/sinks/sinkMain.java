@@ -15,7 +15,7 @@ import org.apache.flink.streaming.api.datastream.SingleOutputStreamOperator;
 import org.apache.flink.streaming.api.functions.sink.filesystem.StreamingFileSink;
 import org.apache.flink.streaming.api.functions.sink.filesystem.rollingpolicies.DefaultRollingPolicy;
 import org.scadsai.benchmarks.streaming.flink.jobs.StreamProcessingMain;
-import org.scadsai.benchmarks.streaming.flink.utils.Tools;
+import org.scadsai.benchmarks.streaming.utils.Tools;
 
 import java.io.File;
 import java.time.Duration;

@@ -69,7 +69,7 @@ run() {
   elif [[ "START_FLINK_PROCESSING" == "$OPERATION" ]]; then
     FLINK_APP_OPTS="--parallelism ${FLINK_PARALLELISM} --source-type kafka --source-kafka-topic ${KAFKA_SOURCE_TOPICS} --source-bootstrap-server ${KAFKA_SOURCE_BOOTSTRAP_SERVER} --sink-type kafka --sink-kafka-topic ${KAFKA_SINK_TOPICS} --sink-bootstrap-server ${KAFKA_SINK_BOOTSTRAP_SERVER} --processing-type ${PROCESSING_TYPE}"
 
-    "$FLINK_HOME/bin/flink" run "$BENCHMARK_DIR/benchmark-processing-flink/target/benchmark-processing-flink-1.0.jar" $FLINK_APP_OPTS > "$LOG_DIR_RUN_LOG_FLINK/flink.log" 2>&1 &
+    "$FLINK_HOME/bin/flink" run "$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar" $FLINK_APP_OPTS > "$LOG_DIR_RUN_LOG_FLINK/flink.log" 2>&1 &
     sleep 10
     logger_info "Flink processing started"
   elif [[ "STOP_FLINK_PROCESSING" == "$OPERATION" ]]; then

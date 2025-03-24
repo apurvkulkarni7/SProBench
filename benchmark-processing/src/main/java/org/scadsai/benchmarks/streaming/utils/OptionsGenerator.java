@@ -1,4 +1,4 @@
-package org.scadsai.benchmarks.streaming.flink.utils;
+package org.scadsai.benchmarks.streaming.utils;
 
 import org.apache.commons.cli.*;
 
