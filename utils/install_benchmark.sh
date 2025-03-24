@@ -286,7 +286,7 @@ download_frameworks() {
   fi
   tar -zxf "$ARCHIVE_FILE" -C "${FRAMEWORK_PATH}"
   FRAMEWORK_TMP_DIR=$(find "${FRAMEWORK_PATH}/"* -maxdepth 1 -type d -name "${FRAMEWORK_NAME}*")
-  mv "${FRAMEWORK_TMP_DIR}/"* "${FRAMEWORK_PATH}/"
+  cp -r "${FRAMEWORK_TMP_DIR}/"* "${FRAMEWORK_PATH}/"
 }
 
 setup_frameworks() {
