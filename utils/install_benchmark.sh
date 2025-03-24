@@ -111,6 +111,7 @@ setup_java() {
     fi
     ;;
   esac
+  export JAVA_HOME
   
   # Verify Java installation
   $JAVA_HOME/bin/java -version >/dev/null 2>&1
