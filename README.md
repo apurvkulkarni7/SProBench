@@ -98,8 +98,8 @@ Following software and frameworks are used to build the benchmark
 
 ### Prerequisites and Installation
 
-You can setup the benchmark on required syetem and also check if the compatible 
-frameworks are installed using:
+The setup needs `wget` and `git` installed on the system as prerequisite. One 
+can setup the benchmark on required syetem using:
 ```sh
 ./runner.sh --setup --system_type localmachine
 ```
@@ -116,26 +116,26 @@ $ ./runner.sh -h
 Usage: runner.sh [OPTIONS]
 
 Description:
-  The entry point script that controls the installation and execution
-  of the benchmark.
+  The entry point script that controls the installation and execution of the
+  benchmark.
 
 Options:
-  --setup             Setup the benchmark to install required software
-                      Requires --system_type and --conf_file
+  --setup             Setup the benchmark to install required software. Requires
+                      --system_type and --conf_file.
+  --compile           Compile the benchmark source code. Requires --system_type
+                      and --conf_file
   --system_type, -s   The system type where the benchmark is running
                       (localmachine, slurm_interactive,slurm_batch)
-  --output_dir, -o    The directory where benchmark output will be 
-                      stored
-  --conf_file, -c     The path to the experiment main configuration
-                      file
+  --output_dir, -o    The directory where benchmark output will be stored
+  --conf_file, -c     The path to the experiment main configuration file
 
 Usage examples:
-  Setup : runner.sh --setup --system_type <type> --conf_file <file>
-  Run   : runner.sh --system_type <type> [options]
-
+  Setup   : runner.sh --setup --system_type <type> --conf_file <file>
+  Compile : runner.sh --compile --system_type <type> --conf_file <file>
+  Run     : runner.sh --system_type <type> [options]
 ```
 
-Once the setup is complete, edit the configuration file as per requirement. Then
+Edit the configuration file as per requirement. Then setup the benchmark. Once the setup is complete, compile the source code. Then
 the benchmark can be started as follows (minimal working example):
 
 ```bash

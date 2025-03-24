@@ -2,32 +2,6 @@
 set -e
 trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
 
-update_profile() {
-  local env_var="$1"
-  local value="$2"
-
-  if [ "$SPB_SYSTEM" = "localmachine" ]; then
-    #Check if benchmarkrc file existis or not.
-    if [ ! -f $BENCHMARKRC ]; then
-      echo '#!/bin/bash' >$BENCHMARKRC
-    else
-      if ! $(grep -q '#!/bin/bash' $BENCHMARKRC); then
-        echo -e "#!/bin/bash\n$(cat $BENCHMARKRC)" >$BENCHMARKRC
-      fi
-    fi
-    # Check if line exist else replace
-    if ! $(grep -q "export $env_var" $BENCHMARKRC); then
-      echo "export $env_var='$value'" >>$BENCHMARKRC
-    else
-      sed -i "s|export $env_var=.*|export $env_var='$value'|g" $BENCHMARKRC
-    fi
-  elif [ "$SPB_SYSTEM" = "slurm" ]; then
-    # For Slurm systems, we'll create a module file later
-    echo "Will create module file for $env_var=$value"
-  fi
-  chmod +x $BENCHMARKRC
-}
-
 # Check and install python
 setup_virtual_env() {
   if [ "$SPB_SYSTEM" = "localmachine" ]; then
@@ -92,7 +66,7 @@ download_java() {
 }
 
 setup_java() {
-  source $BENCHMARKRC
+
   # Create installation directory
   mkdir -p "$DEFAULT_PATH"
 
@@ -137,11 +111,7 @@ setup_java() {
     fi
     ;;
   esac
-
-  update_profile "JAVA_HOME" "$(realpath $JAVA_HOME)"
-
-  source $BENCHMARKRC
-
+  
   # Verify Java installation
   $JAVA_HOME/bin/java -version >/dev/null 2>&1
   if [ $? -ne 0 ]; then
@@ -187,7 +157,6 @@ download_maven() {
 }
 
 setup_maven() {
-  source $BENCHMARKRC
 
   # Create installation directory
   mkdir -p "$DEFAULT_PATH"
@@ -232,8 +201,6 @@ setup_maven() {
     fi
     ;;
   esac
-
-  update_profile "MAVEN_HOME" "$(realpath $MAVEN_HOME)"
 
   # Verify Maven installation
   $MAVEN_HOME/bin/mvn -version >/dev/null 2>&1
@@ -385,7 +352,6 @@ setup_frameworks() {
   esac
 
   eval "${FRAMEWORK_NAME^^}_HOME"=$FRAMEWORK_HOME
-  update_profile "${FRAMEWORK_NAME^^}_HOME" "$(realpath $FRAMEWORK_HOME)"
 
   local FRAMEWORK_BIN_CMD="$(realpath ${FRAMEWORK_HOME})/bin/${FRAMEWORK_BIN_CMD}"
   command -v "$FRAMEWORK_BIN_CMD" >/dev/null 2>&1
@@ -402,7 +368,6 @@ SPB_SYSTEM=$1
 CONF_FILE=$2
 
 CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-export BENCHMARKRC="$(realpath ${CURR_DIR}/../spbbenchmarkrc)"
 
 # Parse command-line arguments
 SETUP_YAML_PARSER=1
@@ -441,8 +406,7 @@ for setup_idx in $(printf '%s\n' "${!FRAMEWORKS_SETUP[@]}" | sort); do
 done
 echo
 echo "Which frameworks to install ? For multiple, space seperated numerical values."
-#read -p "" INSTALL_CHOICE
-INSTALL_CHOICE=0
+read -p "" INSTALL_CHOICE
 
 # Selection check
 SETUP_LENGTH=${#FRAMEWORKS_SETUP[@]}
@@ -500,12 +464,11 @@ echo "────────────────────────�
 echo
 
 # Confirmation prompt
-#read -p "Proceed with installation? [Y/n] " confirm
-confirm='Y'
+read -p "Proceed with installation? [Y/n] " confirm
 [[ $confirm =~ ^[Yy]$ ]] || (echo "Invalid input" && exit 1)
 
 # This gives user some time to cancel the installation process.
-LAUNCH_TIME_SEC=0
+LAUNCH_TIME_SEC=5
 echo "Starting installation process in ${LAUNCH_TIME_SEC} sec"
 while [ $LAUNCH_TIME_SEC -gt 0 ]; do
   echo -ne "Time remaining: $LAUNCH_TIME_SEC seconds\r"
@@ -535,7 +498,8 @@ localmachine)
   if [ $SETUP_SPARK -eq 1 ] || [ $SETUP_ALL -eq 1 ]; then setup_frameworks "spark"; fi
   ;;
 slurm_interactive | slurm_batch)
-  # Check if path module is empty or has some value as none, if it has, then insall the frameworks in default/provided location
+  # Check if path module is empty or has some value as none, if it has, then insall
+  # the frameworks in default/provided location
   echo ""
   ;;
 esac
