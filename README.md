@@ -54,7 +54,8 @@
 <!-- ABOUT THE PROJECT -->
 ## About The Project
 
-This is benchmark designed to understand performance of different streaming frameworks on Slurm based HPC systems.
+This is benchmark designed to understand performance of different streaming
+frameworks on Slurm based HPC systems.
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -98,8 +99,8 @@ Following software and frameworks are used to build the benchmark
 
 ### Prerequisites and Installation
 
-The setup needs `wget` and `git` installed on the system as prerequisite. One 
-can setup the benchmark on required syetem using:
+The setup needs `python`, `wget` and `git` installed on the system as
+prerequisite. One can setup the benchmark on required syetem using:
 ```sh
 ./runner.sh --setup --system_type localmachine
 ```
@@ -135,8 +136,9 @@ Usage examples:
   Run     : runner.sh --system_type <type> [options]
 ```
 
-Edit the configuration file as per requirement. Then setup the benchmark. Once the setup is complete, compile the source code. Then
-the benchmark can be started as follows (minimal working example):
+Edit the configuration file as per requirement. Then setup the benchmark. Once 
+the setup is complete, compile the source code. Then the benchmark can be
+started as follows (minimal working example):
 
 ```bash
 ./runner.sh --system_type localmachine
