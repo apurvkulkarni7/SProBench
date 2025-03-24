@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Properties>
+        <Property name="pattern">%m%n</Property>
+        <Property name="logDir">${sys:logDir}</Property>
+        <Property name="mainLogFileName">${sys:mainLogFileName:-deleteme}</Property>
+        <Property name="throughputLatencyLogFileName">${sys:throughputLatencyLogFileName:-deleteme}</Property>
+<!--        <Property name="throughputLogFileName">${sys:throughputLogFileName:-deleteme}</Property>-->
+<!--        <Property name="latencyLogFileName">${sys:latencyLogFileName:-deleteme}</Property>-->
+    </Properties>
+    <Appenders>
+        <File name="MainAppender" fileName="${logDir}/${mainLogFileName}" append="false">
+            <PatternLayout pattern="[%d{ISO8601}] %p %c{1} - ${pattern}"/>
+        </File>
+        <File name="ThroughputLatencyAppender" fileName="${logDir}/${throughputLatencyLogFileName}" append="false">
+            <PatternLayout pattern="${pattern}"/>
+        </File>
+<!--        <File name="ThroughputAppender" fileName="${logDir}/${throughputLogFileName}" append="false">-->
+<!--            <PatternLayout pattern="${pattern}"/>-->
+<!--        </File>-->
+<!--        <File name="LatencyAppender" fileName="${logDir}/${latencyLogFileName}" append="false">-->
+<!--            <PatternLayout pattern="${pattern}"/>-->
+<!--        </File>-->
+    </Appenders>
+    <Loggers>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="MainAppender"/>
+        </Root>
+        <Logger name="main" level="info" additivity="false">
+            <AppenderRef ref="MainAppender"/>
+        </Logger>
+        <Logger name="throughputLatency" level="info" additivity="false">
+            <AppenderRef ref="ThroughputLatencyAppender"/>
+        </Logger>
+<!--        <Logger name="throughput" level="info" additivity="false">-->
+<!--            <AppenderRef ref="ThroughputAppender"/>-->
+<!--        </Logger>-->
+<!--        <Logger name="latency" level="info" additivity="false">-->
+<!--            <AppenderRef ref="LatencyAppender"/>-->
+<!--        </Logger>-->
+    </Loggers>
+</Configuration>

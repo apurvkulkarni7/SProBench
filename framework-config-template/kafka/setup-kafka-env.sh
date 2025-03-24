@@ -1,0 +1,4 @@
+#!/bin/bash
+
+export JAVA_HOME=FRAMEWORK_JAVA_HOME
+export LOG_DIR=FRAMEWORK_LOG_DIR

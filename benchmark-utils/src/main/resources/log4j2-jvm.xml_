@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+    <Properties>
+        <Property name="pattern">%m%n</Property>
+        <Property name="logDir">${sys:logDir:-/tmp}</Property>
+        <Property name="mainLogFileName">${sys:mainLogFileName:-deleteme}</Property>
+        <Property name="jvmLogFileName">${sys:jvmLogFileName:-deleteme}</Property>
+    </Properties>
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n" />
+        </Console>
+<!--        <File name="MainAppender" fileName="${logDir}/${mainLogFileName}" append="false">-->
+<!--            <PatternLayout pattern="[%d{ISO8601}] %p %c{1} - ${pattern}"/>-->
+<!--        </File>-->
+        <File name="JvmAppender" fileName="${logDir}/${jvmLogFileName}" append="false">
+            <PatternLayout pattern="${pattern}"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="debug" additivity="false">
+<!--            <AppenderRef ref="MainAppender"/>-->
+            <AppenderRef ref="Console"/>
+        </Root>
+<!--        <Logger name="main" level="info" additivity="false">-->
+<!--            <AppenderRef ref="MainAppender"/>-->
+<!--        </Logger>-->
+        <Logger name="jvm" level="info" additivity="false">
+            <AppenderRef ref="JvmAppender"/>
+        </Logger>
+    </Loggers>
+</Configuration>

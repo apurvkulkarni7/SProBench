@@ -1,0 +1,68 @@
+# Root logger option
+#log4j.rootLogger=DEBUG, testlogger
+#log4j.rootLogger=INFO
+#log4j.logger.jmxMetrics = INFO, jmxmetric
+#log4j.logger.gcInfo = INFO, gcinfo
+#
+#======================================================
+# Using same log instances and files for metrics
+#======================================================
+#log4j.appender.metric=org.apache.log4j.FileAppender
+#log4j.appender.metric.append=false
+#log4j.appender.metric.File=./jvm-metric.log
+#log4j.appender.metric.layout=org.apache.log4j.PatternLayout
+#log4j.appender.metric.layout.ConversionPattern=%-4r [%t] %-5p - %m%n
+#log4j.appender.metric.Threshold=INFO
+#
+#======================================================
+# Using 2 different log instances and files
+#======================================================
+#log4j.appender.jmxmetric=org.apache.log4j.FileAppender
+#log4j.appender.jmxmetric.append=false
+##log4j.appender.jmxmetric.File=${env:LOG_DIR:-"/mnt/my_disk/projects/jmx-metrics-extractorm"}/jvm_metrics.log
+#log4j.appender.jmxmetric.File=${logfile.name}
+#log4j.appender.jmxmetric.layout=org.apache.log4j.PatternLayout
+##log4j.appender.jmxmetric.layout.ConversionPattern=%-4r###%m%n
+##log4j.appender.jmxmetric.layout.ConversionPattern=%-6r,%d{yyyy-MM-dd HH:mm:ss,SSS},%m%n
+#log4j.appender.jmxmetric.layout.ConversionPattern=%m%n
+#log4j.appender.jmxmetric.Threshold=INFO
+
+#log4j.appender.gcinfo=org.apache.log4j.FileAppender
+#log4j.appender.gcinfo.append=false
+#log4j.appender.gcinfo.File=./gc_info.log
+#log4j.appender.gcinfo.layout=org.apache.log4j.PatternLayout
+#log4j.appender.gcinfo.layout.ConversionPattern=%-4r [%t] %-5p - %m%n
+#log4j.appender.gcinfo.Threshold=INFO
+#======================================================
+#
+
+
+# Root logger option
+#log4j.rootLogger=Trace, kafka
+#log4j.appender.kafka=com.apache.kafka
+##log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+##log4j.appender.stdout.Target=System.out
+#log4j.appender.kafka.layout=org.apache.log4j.PatternLayout
+#log4j.appender.kafka.layout.ConversionPattern=%------------5p [%t] (%F:%L) - %m%n
+
+# Enable both file and kafka based logging
+log4j.rootLogger=INFO, stdout
+
+log4j.appender.stdout=org.apache.log4j.ConsoleAppender
+log4j.appender.stdout.layout=org.apache.log4j.PatternLayout
+log4j.appender.stdout.layout.ConversionPattern=[%d] %p %m (%c)%n
+
+log4j.logger.org.apache.kafka.clients.producer.KafkaProducer=ALL
+#
+# suppress the irrelevant (wrong) warnings from the netty channel handler
+#log4j.logger.org.jboss.netty.channel.DefaultChannelPipeline=ERROR, testlogger
+#log4j.logger.org.apache.flink.streaming.connectors.kafka.internals.LegacyFetcher=ERROR, testlogger
+log4j.logger.org.jboss.netty.channel.DefaultChannelPipeline=ERROR
+log4j.logger.org.apache.flink.streaming.connectors.kafka.internals.LegacyFetcher=ERROR
+log4j.logger.org.apache=ERROR
+log4j.logger.benchmark.common.advertising.CampaignProcessorCommon=ERROR
+log4j.logger.flink.benchmark.AdvertisingTopologyNative=ERROR
+# log4j.logger.<class_name_defined_in_source_code> = <appender name>
+#log4j.logger.jmxMetrics = INFO, jmxmetric
+#log4j.logger.gcInfo = INFO, gcinfo
+

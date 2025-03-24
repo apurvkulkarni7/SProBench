@@ -1,0 +1,116 @@
+//
+// Source code recreated from a .class file by IntelliJ IDEA
+// (powered by FernFlower decompiler)
+//
+
+package org.scadsai.benchmarks.streaming.generator.utils;
+
+import org.apache.commons.cli.*;
+
+public class OptionsGenerator {
+    public String[] args;
+
+    public OptionsGenerator(String[] args) {
+        this.args = args;
+    }
+
+    public CommandLine build() {
+        Options options = new Options();
+        Option help = Option.builder()
+                .option("h")
+                .longOpt("help")
+                .hasArg(false)
+                .desc("Prints this message")
+                .build();
+        options.addOption(help);
+
+        Option file = Option.builder()
+                .option("f")
+                .longOpt("file")
+                .hasArg(true)
+                .argName("path-to-database-file")
+                .desc("Database file. (Required)")
+                .build();
+        options.addOption(file);
+
+        Option kafkaTopic = Option.builder()
+                .option("kt").longOpt("kafka-topic")
+                .hasArg(true)
+                .argName("kafka-topic-name")
+                .desc("Kafka topic where messages will be published. (Required)")
+                .build();
+        options.addOption(kafkaTopic);
+
+        Option bootstrapServer = Option.builder()
+                .option("bs")
+                .longOpt("bootstrap-server")
+                .hasArg(true)
+                .argName("host:port")
+                .desc("Kafka server address where messages will be published. (Required)")
+                .build();
+        options.addOption(bootstrapServer);
+
+        Option runTime = Option.builder()
+                .option("rt")
+                .longOpt("run-time")
+                .hasArg(true)
+                .argName("<milliseconds>")
+                .desc("Runtime of the program. Optional argument (default value - 10000).")
+                .build();
+        runTime.setType(Long.TYPE);
+        options.addOption(runTime);
+
+        Option generatorType = Option.builder()
+                .option("gt")
+                .longOpt("generator-type")
+                .hasArg(true)
+                .argName("<constant/random>")
+                .desc("To generate events at constant or random rate. For 'constant' option, frequency of events is set using --loadHz. For 'random' option, maximum pause between each event (10 seconds)")
+                .build();
+        options.addOption(generatorType);
+
+        Option numberOfSensors = Option.builder()
+                .option("nos")
+                .longOpt("number-of-sensors")
+                .hasArg(true).argName("<integer>")
+                .desc("Number of sensorIDs to be generated-")
+                .build();
+        numberOfSensors.setType(Integer.TYPE);
+        options.addOption(numberOfSensors);
+
+        Option loadHz = Option.builder()
+                .option("loadHz")
+                .longOpt("loadHz")
+                .hasArg(true)
+                .argName("<events-per-seconds>")
+                .desc("Events per seconds that will be pushed to Kafka topic. Used with '--generator-type constant' option.Optional argument (default value - 10000).")
+                .build();
+        loadHz.setType(Long.TYPE);
+        options.addOption(loadHz);
+
+        Option threadCount = Option.builder()
+                .option("tc")
+                .longOpt("thread-count")
+                .hasArg(true)
+                .argName("<int>")
+                .desc("Number of parallel threads to be used for data generation (default value - 1).")
+                .build();
+        threadCount.setType(Integer.TYPE);
+        options.addOption(threadCount);
+
+        CommandLineParser parser = new DefaultParser();
+        CommandLine cmd = null;
+
+        try {
+            cmd = parser.parse(options, this.args);
+            if (cmd.hasOption("help")) {
+                HelpFormatter formatter = new HelpFormatter();
+                formatter.printHelp("myProducer.jar", options);
+                System.exit(0);
+            }
+            return cmd;
+        } catch (ParseException var14) {
+            throw new RuntimeException(var14);
+        }
+    }
+}
