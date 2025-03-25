@@ -6,7 +6,7 @@ FRAMEWORK=$1
 
 if [[ "$FRAMEWORK" == "FLINK" ]]; then
   check_directory FLINK_CONF_DIR
-  
+
   # Create/overwrite master file
   check_file FLINK_MASTER_FILE
   echo "$FLINK_MASTER:8081" > "${FLINK_MASTER_FILE}"
@@ -71,7 +71,7 @@ if [[ "${KAFKA_ARCH}" == "1" ]] || [[ ! $(is_hpc) ]]; then
   sed -i 's|KAFKA_CONTROLLER_SERVER_ALL$|'"$NODE_ID@$KAFKA_SOURCE_HOST:9093"'|g' "$KAFKA_CONFIG_SERVER_FILE"
   cp "$KAFKA_CONFIG_SERVER_FILE" "${LOG_DIR_RUN_CONFIG_KAFKA}/${KAFKA_SOURCE_HOST}.properties"
 elif [[ "${KAFKA_ARCH}" == "2" ]]; then
-  
+
   WORKERS="$FLINK_WORKERS"
   NODE_ID=1
   TMP_CONT_QUO_VOT=""

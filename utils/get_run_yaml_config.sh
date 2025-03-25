@@ -41,11 +41,11 @@ if [[ "${SBP_SYSTEM}" =~ "slurm*" ]]; then
   # Get some extra system information after job is initialized
   scontrol show --json jobid $SLURM_JOBID > $LOG_DIR_RUN_CONFIG/slurm_job_info.json
   cp /proc/cpuinfo "${LOG_DIR_RUN_CONFIG}"/slurm_cpu_info.out
-  module load GCC/13.2.0 
+  module load GCC/13.2.0
   module load OpenMPI/4.1.6
   lstopo --no-factorize --no-collapse --force $LOG_DIR_RUN_CONFIG/topology.svg
   module unload OpenMPI/4.1.6
-  
+
   REQ_CPU_NUM=$((NUM_CPU_MASTER+NUM_CPU_WORKERS+NUM_CPU_WORKERS_SPARE+GENERATOR_CPU_NUM_TOTAL)) #This logic is good only if all the processes on same node
   MAX_CPU_NUM=$((SLURM_CPUS_PER_TASK*SLURM_JOB_NUM_NODES))
   if [[ "$REQ_CPU_NUM" -gt "$MAX_CPU_NUM" ]]; then
@@ -58,7 +58,7 @@ if [[ "${SBP_SYSTEM}" =~ "slurm*" ]]; then
   MAX_MEM_NODE_UNIT=${MAX_MEM_NODE:(-1)}
   MAX_MEM_NODE=${MAX_MEM_NODE%[GgMm]}
   check_var MAX_MEM_NODE
-  if [[ "$MAX_MEM_NODE_UNIT" != "G" ]]; then 
+  if [[ "$MAX_MEM_NODE_UNIT" != "G" ]]; then
     logger_error "SLURM job memory unit doesn't match with 'G'. Aborting."
     exit 0
   fi

@@ -39,7 +39,7 @@ run() {
     CHECK_INTERVAL_SEC="60"
     monitor_kafka_broker "${KAFKA_SOURCE_HOST}" "${SLURM_JOBID}"  "${BENCHMARK_RUNTIME_SEC}" "${CHECK_INTERVAL_SEC}" "${LOG_DIR_RUN_LOG}/STATUS" &
     create_or_update_kafka_topic "${LEADER_WORKER}:9092" "${KAFKA_SOURCE_PARTITION_NUM}" "${KAFKA_SOURCE_TOPICS}"
-    
+
     if [[ "${FRAMEWORK}" != "GENERATOR" ]]; then
       create_or_update_kafka_topic "${LEADER_WORKER}:9092" "${KAFKA_SINK_PARTITION_NUM}" "${KAFKA_SINK_TOPICS}"
     fi
@@ -98,9 +98,9 @@ run() {
     STARTING_CPUID=0
     ENDING_CPUID=$GENERATOR_CPU_NUM
     for (( GENERATOR_i=0; GENERATOR_i<"$GENERATOR_NUM"; GENERATOR_i++ )); do
-      
+
       GENERATOR_CPU_ID="$(get_cpus ${STARTING_CPUID} ${ENDING_CPUID})"
-      
+
       if ! is_hpc; then
         GEN_WRAPPER=${JAVA}
       else
@@ -113,7 +113,7 @@ run() {
         -cp "$BENCHMARK_DIR/benchmark-generator/target/benchmark-generator-1.0.jar" \
         org.scadsai.benchmarks.streaming.generator.GeneratorMain \
         $GENERATOR_OPT > "$LOG_DIR_RUN_LOG_GENERATOR/generator_$GENERATOR_i.out" 2>&1 &
-      
+
       GEN_PID="$!"
       logger_info "Started Load Generator (pid=${GEN_PID}) with load ${GENERATOR_LOAD_PER_GENERATOR_HZ} Hz."
 
@@ -128,8 +128,8 @@ run() {
     #############################################################################
     # Running jmx on master node
     run_jmx_collector "${FLINK_MASTER}" "JVMMetricExtractor" \
-      "StandaloneSessionClusterEntrypoint" "${FLINK_MASTER}_master" 
-  
+      "StandaloneSessionClusterEntrypoint" "${FLINK_MASTER}_master"
+
     # Running jmx on worker nodes
     for WORKER_i in $FLINK_WORKERS; do
       run_jmx_collector "${WORKER_i}" "JVMMetricExtractor" \

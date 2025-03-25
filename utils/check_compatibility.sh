@@ -1,5 +1,5 @@
 #!/bin/bash
-set -e 
+set -e
 
 BENCHMARK_DIR="$(dirname $(dirname $(realpath $0)))"
 source $BENCHMARK_DIR/utils/init.sh
@@ -11,7 +11,7 @@ source $BENCHMARK_DIR/utils/setup_framework.sh CHECK $1
 check_module_version() {
     local module_name=$1
     local expected_version=$2
-    
+
 }
 
 check_version() {
@@ -20,10 +20,10 @@ check_version() {
     local version_cmd=$3
     local version_regex=$4
     local framework_name=$5
-    
+
     if is_hpc; then
         local module_name=$cmd
-        
+
         module load "$module_name/$expected_version" &> /dev/null
         if [[ $? -eq 0 ]]; then
             echo "Module $module_name/$expected_version is available."
@@ -31,7 +31,7 @@ check_version() {
             echo "Module $module_name/$expected_version is not available."
         fi
     else
-        if which "$cmd" &> /dev/null; then  
+        if which "$cmd" &> /dev/null; then
             output_version_cmd="$(eval $version_cmd)"
             actual_version=$(echo $output_version_cmd | grep -oP "$version_regex")
             if [[ $actual_version == "$expected_version" ]]; then

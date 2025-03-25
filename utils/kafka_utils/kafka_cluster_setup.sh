@@ -18,7 +18,7 @@ CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
 
 source "${UTILS_DIR}/utils.sh"
 
-if [[ $SPB_SYSTEM =~ slurm_* ]]; then  
+if [[ $SPB_SYSTEM =~ slurm_* ]]; then
   load_modules "release/24.04" "GCC/13.2.0" "Kafka/3.6.1-scala-2.13"
 fi
 

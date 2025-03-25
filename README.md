@@ -125,7 +125,8 @@ brew install wget git python
 ```
 Note: venv is included in the Python installation on macOS.
 
-Once you have installed all the required packages, you can proceed with benchmark installation.
+Once you have installed all the required packages, you can proceed with benchmark
+installation.
 
 ### Installation
 One can setup the benchmark on required syetem using:

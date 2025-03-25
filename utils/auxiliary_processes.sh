@@ -6,7 +6,7 @@ run_jmx_collector() {
   local host=$1
   local metric_collector=$2
   local process_name=$3 # Process which needs to be tracked
-  
+
   local jobid=$SLURM_JOBID
   local process_mem="300M"
   local jmx_classpath="${BENCHMARK_DIR}/benchmark-utils/target/benchmark-utils-1.0.jar org.metrics.${metric_collector}"
@@ -77,7 +77,7 @@ monitor_kafka_broker() {
 
         current_time=$(date +%s)
         local elapsed_time=$((current_time - start_time))
-        
+
         if [[ "$elapsed_time" -ge "$runtime" ]]; then
             #echo "Monitoring duration exceeded. Exiting monitoring script."
             exit 0
