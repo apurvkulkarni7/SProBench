@@ -99,13 +99,20 @@ Following software and frameworks are used to build the benchmark
 
 ### Prerequisites and Installation
 
-The setup needs `python`, `wget` and `git` installed on the system as
+The setup needs  `wget`, `git`, `python` and `venv` (for creating virtual environment)
+installed on the system as
 prerequisite. One can setup the benchmark on required syetem using:
 ```sh
-./runner.sh --setup --system_type localmachine
+./runner.sh --system_type localmachine --setup
 ```
 You can use the provided default configuration [file](./default_config.yaml) for
 the inspiration for creating own configuration file.
+
+Once the setup is complete, the source code can be compiled using:
+```sh
+./runner.sh --system_type localmachine --compile
+```
+![](./doc_res/benchmark_setup.gif)
 
 <p align="right">(<a href="#readme-top">back to top</a>)</p>
 
@@ -143,6 +150,8 @@ started as follows (minimal working example):
 ```bash
 ./runner.sh --system_type localmachine
 ```
+
+![](./doc_res/benchmark_run.gif)
 
 <!-- BENCHMARK -->
 ## About Benchmark
