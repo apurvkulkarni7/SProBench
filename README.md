@@ -1,17 +1,17 @@
 <!-- PROJECT LOGO -->
-<br />
+#
 <div align="center">
   <a href="https://github.com/apurvkulkarni7/SProBench">
     <img src="doc_res/logo.png" alt="Logo" width="1000">
   </a>
   <h1 align="center">
-    Streaming Processing Benchmark for High Performance Computing
+    Streaming Processing Benchmark for <br> High Performance Computing Systems
   </h1>
-  
+
   <p align="center">
 
   <br />
-    <a href="https://github.com/apurvkulkarni7/">View Demo</a> |
+    <a href="doc_res/benchmark_run.gif">View Demo</a> |
     <a href="https://github.com/apurvkulkarni7/SProBench/issues">Report Bug</a> |
     <a href="https://github.com/apurvkulkarni7/SProBench/issues">Request Feature</a>
   </p>
@@ -37,7 +37,7 @@
       </ul>
     </li>
     <li><a href="#usage">Usage</a></li>
-    <li><a href="#about-benchmark">Benchmark</a>
+    <li><a href="#about-benchmark">About Benchmark</a>
       <ul>
         <li><a href="#workflow">Workflow</a></li>
         <li><a href="#data-loading">Data Loading</a></li>
@@ -57,7 +57,7 @@
 This is benchmark designed to understand performance of different streaming
 frameworks on Slurm based HPC systems.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 
 ## Software Stack
@@ -67,14 +67,14 @@ Following software and frameworks are used to build the benchmark
 ### Core software
 
 | Technology | Version  | Description |
-| --- |  --- | --- | 
+| --- |  --- | --- |
 | [![Java][Java-image]][Java-url] | 11 | Core programming language |
 |[![Apache Maven][Maven-image]][Maven-url] | 3.9.6 | Build automation tool for Java application |
 
 ### Message broker
 
 | Technology | Version  | Description |
-| --- |  --- | --- | 
+| --- |  --- | --- |
 |[![Apache Kafka][Kafka-image]][Kafka-url] | 3.6.1 | Message broker for distributed streaming and event-driven architectures |
 
 ### Streaming software
@@ -93,15 +93,42 @@ Following software and frameworks are used to build the benchmark
 | Local machine | Linux |  | Available |
 | SLURM based HPC | Linux/slurm-23.03 |  | Available |
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 ## Getting Started
 
-### Prerequisites and Installation
+### Prerequisites
 
-The setup needs  `wget`, `git`, `python` and `venv` (for creating virtual environment)
-installed on the system as
-prerequisite. One can setup the benchmark on required syetem using:
+The setup requires the following packages to be installed on the system as prerequisites:
+- **wget**: a command-line utility for downloading files from the internet
+- **git**: a version control system for managing code repositories
+- **python**: a programming language interpreter
+- **venv** (or virtualenv): a tool for creating isolated Python environments
+
+
+To install these packages, follow the instructions for your operating system:
+
+-  Ubuntu/Debian-based systems
+```bash
+sudo apt update
+sudo apt install wget git python3 python3-venv
+```
+
+- Red Hat/Fedora-based systems
+```bash
+sudo dnf install wget git python3 python3-venv
+```
+
+- macOS (with Homebrew)
+```bash
+brew install wget git python
+```
+Note: venv is included in the Python installation on macOS.
+
+Once you have installed all the required packages, you can proceed with benchmark installation.
+
+### Installation
+One can setup the benchmark on required syetem using:
 ```sh
 ./runner.sh --system_type localmachine --setup
 ```
@@ -112,9 +139,9 @@ Once the setup is complete, the source code can be compiled using:
 ```sh
 ./runner.sh --system_type localmachine --compile
 ```
-![](./doc_res/benchmark_setup.gif)
+![benchmark_run](./doc_res/benchmark_setup.gif)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 ## Usage
 
@@ -143,7 +170,7 @@ Usage examples:
   Run     : runner.sh --system_type <type> [options]
 ```
 
-Edit the configuration file as per requirement. Then setup the benchmark. Once 
+Edit the configuration file as per requirement. Then setup the benchmark. Once
 the setup is complete, compile the source code. Then the benchmark can be
 started as follows (minimal working example):
 
@@ -152,6 +179,8 @@ started as follows (minimal working example):
 ```
 
 ![](./doc_res/benchmark_run.gif)
+
+<p align="right">(<a href="#">back to top</a>)</p>
 
 <!-- BENCHMARK -->
 ## About Benchmark
@@ -166,11 +195,11 @@ and consist of following three pipelines
 ![](./doc_res/benchmark_pipeline.png)
 
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 <!-- ROADMAP -->
 ## Roadmap
-- [ ] Complete support for 
+- [ ] Complete support for
   - [ ] Windflow
   - [ ] Apache Storm
   - [ ] Hazelcast
@@ -182,10 +211,10 @@ and consist of following three pipelines
 
 See the open issues for a full list of proposed features (and known issues).
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 <!-- CONTRIBUTING -->
-## Contributing
+## Contribution
 
 Contributions are what make the open source community such an amazing place to learn, inspire, and create. Any contributions you make are **greatly appreciated**.
 
@@ -198,7 +227,7 @@ Don't forget to give the project a star! Thanks again!
 4. Push to the Branch (`git push origin feature/AmazingFeature`)
 5. Open a Pull Request
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 
 
@@ -207,7 +236,7 @@ Don't forget to give the project a star! Thanks again!
 
 Distributed under the **GNU GENERAL PUBLIC LICENSE V3**. See [LICENSE](./LICENSE) for more information.
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 
 <!-- ACKNOWLEDGMENTS -->
@@ -215,7 +244,7 @@ Distributed under the **GNU GENERAL PUBLIC LICENSE V3**. See [LICENSE](./LICENSE
 
 * [ScaDS.AI](https://scads.ai)
 
-<p align="right">(<a href="#readme-top">back to top</a>)</p>
+<p align="right">(<a href="#">back to top</a>)</p>
 
 
 
