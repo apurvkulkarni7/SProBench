@@ -29,9 +29,9 @@ for FRAMEWORK_i in $FRAMEWORK_LIST; do
           source "$BENCHMARK_DIR"/utils/setup_batch_job_parameters.sh $INIT_CONF_FILE
 
           #Setup experiment directory structure
-          if [[ "$FRAMEWORK_i" == "(FLINK|SPARK_STREAMING|KAFKASTREAM)" ]]; then
+          if [[ "$FRAMEWORK_i" =~ (FLINK|SPARK_STREAMING|KAFKASTREAM) ]]; then
             RUN_DIR_NAME="W${NUM_WORKERS_i}_C${NUM_CPU_WORKERS_i}_L${GENERATOR_LOAD_HZ_i}/${PROCESSING_TYPE}/R${RUN_i}"
-          elif [[ "$FRAMEWORK_i" == "GENERATOR" ]]; then
+          elif [[ "$FRAMEWORK_i" =~ (MESSAGE_BROKER) ]]; then
             check_var GENERATOR_NUM
             check_var GENERATOR_CPU_NUM
             check_var MEM_GENERATOR
