@@ -16,34 +16,17 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.scadsai.benchmarks.streaming.utils.SensorReading;
 
 import static org.scadsai.benchmarks.streaming.utils.Tools.roundOfThree;
 
 public class Transformations {
+
     public static final Logger Logger = LogManager.getLogger("throughput");
 
     public Transformations() {
     }
 
-    public static class SensorReading {
-        public long timestamp;
-        public String sensorId;
-        public double temperature;
-        public boolean aboveThreashold;
-        public double movingAverage;
-
-        public SensorReading(long timestamp, String sensorId, double temperature) {
-            this.timestamp = timestamp;
-            this.sensorId = sensorId;
-            this.temperature = temperature;
-
-        }
-
-        @Override
-        public String toString() {
-            return + this.timestamp + "," + this.sensorId + "," + this.temperature + "," +  this.aboveThreashold + "," + this.movingAverage;
-        }
-    }
 
     public static DataStream<SensorReading> inputEventParser(DataStream<String> inputStream) {
         return inputStream.map(new MapFunction<String, SensorReading>() {

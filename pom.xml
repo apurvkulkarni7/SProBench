@@ -33,7 +33,7 @@
         <log4j.version>2.20.0</log4j.version>
         <commons-cli.version>1.5.0</commons-cli.version>
         <commons-io.version>2.14.0</commons-io.version>
-        <snakeyaml.version>1.11</snakeyaml.version>
+        <snakeyaml.version>2.4</snakeyaml.version>
         <maven-jar-plugin.version>3.2.0</maven-jar-plugin.version>
         <commons-lang3>3.14.0</commons-lang3>
     </properties>
@@ -158,7 +158,12 @@
             <dependency>
                 <groupId>org.yaml</groupId>
                 <artifactId>snakeyaml</artifactId>
-                <version>${snakeyaml.version}</version>
+                <version>2.4</version>
+            </dependency>
+            <dependency>
+                <groupId>com.fasterxml.jackson.dataformat</groupId>
+                <artifactId>jackson-dataformat-yaml</artifactId>
+                <version>2.14.2</version>
             </dependency>
             <!-- To get CLI parameters -->
             <dependency>

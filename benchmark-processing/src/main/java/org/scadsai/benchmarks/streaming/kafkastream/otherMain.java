@@ -10,7 +10,7 @@ import org.apache.kafka.streams.kstream.Produced;
 import java.util.Properties;
 import java.util.concurrent.CountDownLatch;
 
-public class main {
+public class Main {
     public static void main(String[] args) {
         // Set up the configuration properties
         Properties props = new Properties();

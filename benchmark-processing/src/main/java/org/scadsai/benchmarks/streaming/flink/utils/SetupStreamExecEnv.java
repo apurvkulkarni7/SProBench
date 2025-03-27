@@ -3,7 +3,7 @@ package org.scadsai.benchmarks.streaming.flink.utils;
 import org.apache.commons.cli.CommandLine;
 import org.apache.flink.streaming.api.environment.StreamExecutionEnvironment;
 
-import static org.scadsai.benchmarks.streaming.flink.jobs.StreamProcessingMain.MainLogger;
+import static org.scadsai.benchmarks.streaming.flink.Main.MAIN_LOGGER;
 
 public class SetupStreamExecEnv {
     private final int parallelism;
@@ -24,7 +24,7 @@ public class SetupStreamExecEnv {
         if (this.getParallelism() == 0) {
             // Default parallelism is the total number of TaskManagers slots (16 for this machine)
             int defaultParallelism = env.getParallelism();
-            MainLogger.info("Using default parallelism: {}", defaultParallelism);
+            MAIN_LOGGER.info("Using default parallelism: {}", defaultParallelism);
             env.setParallelism(defaultParallelism);
         } else {
             env.setParallelism(getParallelism());

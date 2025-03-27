@@ -18,13 +18,14 @@
 #   This allows the benchmark to be repeated multiple times with the same
 #   configuration.
 # - total_load_hz: The total workload in Hz.
-debug_mode: "false"
+debug_mode: "true"
 logging_level: 1
 benchmark_runtime_min: 5
 metric_logging_interval_sec: 10
 runs_per_configuration: 1
 total_workload_hz:
   - 2
+tmp_dir: /tmp
 ##############################
 # Generator Settings
 ##############################
@@ -72,7 +73,7 @@ generator:
 # - mem_node_worker: The memory allocated to each worker node in GB.
 # - mem_node_spare: The spare memory in GB for auxilliary process.
 stream_processor:
-  processing_type: P0
+  processing_type: P1
   framework:
     - flink
   master:
@@ -84,6 +85,7 @@ stream_processor:
     memory_gb: 1
     parallelism:
       - 1
+  stateful_dir: /tmp
 num_cpus_spare: 1
 mem_node_spare: 1
 ##############################

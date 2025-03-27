@@ -16,11 +16,21 @@ source "${BENCHMARK_DIR}/utils/utils.sh"
 # Setting up directory
 logger_info "Setting up experiment directory structure"
 
-DEBUG="$($(get_curr_dir)/yaml_parser '.debug_mode' < ${INIT_CONF_FILE})"
+DEBUG="$($(get_curr_dir)/yaml_parser '.debug_mode' <${INIT_CONF_FILE})"
 
 if [[ "$DEBUG" == "false" ]]; then
+  case $SPB_SYSTEM in
+  localmachine)
+    SLURM_JOBID="localmachine"
+    ;;
+  slurm_interactive | slurm_batch)
+    SLURM_JOBID="${SLURM_JOBID}"
+    ;;
+  esac
   export LOG_DIR_RUN_SAVE="$LOG_DIR_RUN"
-  export LOG_DIR_RUN="/dev/shm/${SLURM_JOBID}/$LOG_DIR_RUN"
+  export TMP_DIR="$($YQ '.tmp_dir' $INIT_CONF_FILE)"
+  export LOG_DIR_RUN="$(realpath ${TMP_DIR})/${SLURM_JOBID}/${LOG_DIR_RUN}"
+  mkdir -p  "$LOG_DIR_RUN"
   mkdir -p "$LOG_DIR_RUN_SAVE"
 fi
 
