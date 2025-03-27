@@ -17,7 +17,7 @@ FRAMEWORK_LIST="$($YQ '.stream_processor.framework | join(" ")' $INIT_CONF_FILE)
 
 FRAMEWORK_LIST=${FRAMEWORK_LIST^^}
 
-if [[ "$FRAMEWORK_LIST" =~ "(GENERATOR|MESSAGE_BROKER)" ]]; then
+if [[ "$FRAMEWORK_LIST" =~ (GENERATOR|MESSAGE_BROKER) ]]; then
   GENERATOR_CPU_NUM="$($YQ '.generator.cpu' $INIT_CONF_FILE)"
   MEM_GENERATOR="$($YQ '.generator.memory_gb' $INIT_CONF_FILE)"
 fi

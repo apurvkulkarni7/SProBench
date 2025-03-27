@@ -2,8 +2,10 @@ package org.scadsai.benchmarks.streaming.flink.utils;
 
 import org.apache.flink.api.common.functions.RichMapFunction;
 import org.apache.flink.configuration.Configuration;
+import org.apache.kafka.streams.KeyValue;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.scadsai.benchmarks.streaming.utils.SensorReading;
 
 public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
     private static final Logger MetricLogger = LogManager.getLogger("metric");
@@ -59,7 +61,7 @@ public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
         if (this.processingType.equals("P0")) {
         this.latencyTotal += this.timeTwo - Long.valueOf(element.toString().split(",")[0]);
         } else if (this.processingType.equals("P1") || this.processingType.equals("P2")) {
-            this.latencyTotal += this.timeTwo - (Long) ((Transformations.SensorReading) element).timestamp;
+            this.latencyTotal += this.timeTwo - (Long) ((SensorReading) element).timestamp;
         }
 
 
@@ -96,4 +98,5 @@ public class MetricLoggerMap<T> extends RichMapFunction<T, T> {
 
         return element;
     }
+
 }

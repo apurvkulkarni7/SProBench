@@ -21,7 +21,7 @@ localmachine)
   FRAMEWORK_HOME=$($YQ '.frameworks.'${FRAMEWORK,,}'.local_setup.path' $CONF_FILE_RUN)
   if [[ $FRAMEWORK_HOME == 'default' ]]; then FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${FRAMEWORK,,}";  fi
   export ${FRAMEWORK^^}_HOME=$FRAMEWORK_HOME
-  
+
   ;;
 
 slurm_interactive | slurm_batch)
@@ -38,7 +38,7 @@ slurm_interactive | slurm_batch)
       module use $i
     done
   done
-  
+
   logger_info "Loading core modules"
   CORE_FRAMEWORKS="java maven kafka"
   for CORE_FRAMEWORK_i in $CORE_FRAMEWORKS; do
@@ -63,9 +63,9 @@ slurm_interactive | slurm_batch)
   else
     logger_error "Maven module not loaded correctly."
   fi
-  
+
   [[ $(check_var KAFKA_HOME) ]] && logger_error "Kafka module not available." && exit 1
-  
+
   case ${FRAMEWORK,,} in
   flink)
     ((check_var FLINK_ROOT_DIR 2>&1 > /dev/null) || (check_var FLINK_HOME 2>&1 >/dev/null)) || \

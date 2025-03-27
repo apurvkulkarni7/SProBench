@@ -146,9 +146,8 @@ export KAFKA_LOG4J_OPTS_TOPIC="-Dlog4j.configuration=file:$LOG_DIR_RUN_CONFIG_KA
 check_directory LOG_DIR_RUN_CONFIG_KAFKA
 export KAFKA_CONFIG_SERVER_FILE="$LOG_DIR_RUN_CONFIG_KAFKA/kraft/server.properties"
 export KAFKA_CONFIG_PRODUCER_PROP_FILE="$LOG_DIR_RUN_CONFIG_KAFKA/producer.properties"
-# export KAFKA_LOG_DIR="/tmp/${USER}/${SLURM_JOBID}/${LOG_DIR_RUN_LOG_KAFKA}/kafka-logs" # this is different from actual logging directory
-# export KAFKA_LOG_DIR="$LOG_DIR_RUN_LOG_KAFKA/tmp/$USER/kafka-logs" # this is different from actual logging directory
-export KAFKA_LOG_DIR="/dev/shm/${USER}/${SLURM_JOBID}/$LOG_DIR_RUN_LOG_KAFKA/kafka-logs" # this is different from actual logging directory
+TMP_DIR=$($YQ '.tmp_dir' $CONF_FILE_RUN)
+export KAFKA_LOG_DIR="${TMP_DIR}/${USER}/${SLURM_JOBID}/$LOG_DIR_RUN_LOG_KAFKA/kafka-logs" # this is different from actual logging directory
 
 if ! is_hpc; then
   # Kafka configuration

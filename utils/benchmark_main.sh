@@ -39,7 +39,7 @@ run() {
     CHECK_INTERVAL_SEC="60"
     monitor_kafka_broker "${KAFKA_SOURCE_HOST}" "${SLURM_JOBID}"  "${BENCHMARK_RUNTIME_SEC}" "${CHECK_INTERVAL_SEC}" "${LOG_DIR_RUN_LOG}/STATUS" &
     create_or_update_kafka_topic "${LEADER_WORKER}:9092" "${KAFKA_SOURCE_PARTITION_NUM}" "${KAFKA_SOURCE_TOPICS}"
-    
+
     if [[ "${FRAMEWORK}" != "GENERATOR" ]]; then
       create_or_update_kafka_topic "${LEADER_WORKER}:9092" "${KAFKA_SINK_PARTITION_NUM}" "${KAFKA_SINK_TOPICS}"
     fi
@@ -66,7 +66,11 @@ run() {
   elif [[ "START_FLINK_PROCESSING" == "$OPERATION" ]]; then
     FLINK_APP_OPTS="--parallelism ${FLINK_PARALLELISM} --source-type kafka --source-kafka-topic ${KAFKA_SOURCE_TOPICS} --source-bootstrap-server ${KAFKA_SOURCE_BOOTSTRAP_SERVER} --sink-type kafka --sink-kafka-topic ${KAFKA_SINK_TOPICS} --sink-bootstrap-server ${KAFKA_SINK_BOOTSTRAP_SERVER} --processing-type ${PROCESSING_TYPE}"
 
-    "$FLINK_HOME/bin/flink" run "$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar" $FLINK_APP_OPTS > "$LOG_DIR_RUN_LOG_FLINK/flink.log" 2>&1 &
+    "$FLINK_HOME/bin/flink" run \
+      -c org.scadsai.benchmarks.streaming.flink.Main \
+      "$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar" \
+      $FLINK_APP_OPTS > "$LOG_DIR_RUN_LOG_FLINK/flink.log" 2>&1 &
+      
     sleep 10
     logger_info "Flink processing started"
   elif [[ "STOP_FLINK_PROCESSING" == "$OPERATION" ]]; then
@@ -81,10 +85,23 @@ run() {
       logger_info "Stopped Flink processing."
       sleep 3
     fi
+  #############################################################################
+  # Processing - KafkaStream
+  #############################################################################
+  elif [[ "START_KAFKASTREAM_PROCESSING" == "$OPERATION" ]]; then
+    FLINK_APP_OPTS="-c ${}/config.yaml -bs localhost:9092"
+
+    "$FLINK_HOME/bin/flink" run \
+      -c org.scadsai.benchmarks.streaming.flink.Main \
+      "$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar" \
+      $FLINK_APP_OPTS > "$LOG_DIR_RUN_LOG_FLINK/flink.log" 2>&1 &
+      
+    sleep 10
+    logger_info "Flink processing started"
+  #############################################################################
+  # Generator
+  #############################################################################
   elif [[ "START_LOAD" == "$OPERATION" ]]; then
-    #############################################################################
-    # Generator
-    #############################################################################
     GENERATOR_OPT="--kafka-topic ${KAFKA_SOURCE_TOPICS} --bootstrap-server $KAFKA_SOURCE_BOOTSTRAP_SERVER"
     GENERATOR_OPT="$GENERATOR_OPT --loadHz ${GENERATOR_LOAD_PER_GENERATOR_HZ} --run-time-min ${BENCHMARK_RUNTIME_MIN}"
     GENERATOR_OPT="$GENERATOR_OPT --number-of-sensors ${NUM_CPU_WORKERS} --thread-count ${GENERATOR_THREAD_PER_CPU_NUM}"
@@ -98,9 +115,9 @@ run() {
     STARTING_CPUID=0
     ENDING_CPUID=$GENERATOR_CPU_NUM
     for (( GENERATOR_i=0; GENERATOR_i<"$GENERATOR_NUM"; GENERATOR_i++ )); do
-      
+
       GENERATOR_CPU_ID="$(get_cpus ${STARTING_CPUID} ${ENDING_CPUID})"
-      
+
       if ! is_hpc; then
         GEN_WRAPPER=${JAVA}
       else
@@ -113,7 +130,7 @@ run() {
         -cp "$BENCHMARK_DIR/benchmark-generator/target/benchmark-generator-1.0.jar" \
         org.scadsai.benchmarks.streaming.generator.GeneratorMain \
         $GENERATOR_OPT > "$LOG_DIR_RUN_LOG_GENERATOR/generator_$GENERATOR_i.out" 2>&1 &
-      
+
       GEN_PID="$!"
       logger_info "Started Load Generator (pid=${GEN_PID}) with load ${GENERATOR_LOAD_PER_GENERATOR_HZ} Hz."
 
@@ -128,8 +145,8 @@ run() {
     #############################################################################
     # Running jmx on master node
     run_jmx_collector "${FLINK_MASTER}" "JVMMetricExtractor" \
-      "StandaloneSessionClusterEntrypoint" "${FLINK_MASTER}_master" 
-  
+      "StandaloneSessionClusterEntrypoint" "${FLINK_MASTER}_master"
+
     # Running jmx on worker nodes
     for WORKER_i in $FLINK_WORKERS; do
       run_jmx_collector "${WORKER_i}" "JVMMetricExtractor" \
@@ -207,6 +224,25 @@ run() {
     run "STOP_FLINK_PROCESSING"
     run "STOP_FLINK"
     run "STOP_JMX_COLLECTOR"
+    run "STOP_KAFKA"
+  elif [[ "FLINK_TEST_START" == "$OPERATION" ]]; then
+    run "START_KAFKA"
+    run "START_FLINK"
+    sleep 5s
+    run "START_JMX_COLLECTOR"
+    run "START_FLINK_PROCESSING"
+    run "START_LOAD"
+    run "START_JMX_KAFKA_COLLECTOR" "eventsIn"
+    run "START_JMX_KAFKA_COLLECTOR" "eventsOut"
+    $JAVA_HOME/bin/jps > $LOG_DIR_RUN_LOG/running_java_proceses
+    logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    sleep "${BENCHMARK_RUNTIME_MIN}m"
+    logger_info "Completed running benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    echo "==" >> $LOG_DIR_RUN_LOG/running_java_proceses
+    $JAVA_HOME/bin/jps >> $LOG_DIR_RUN_LOG/running_java_proceses
+    #run "STOP_FLINK_PROCESSING"
+    run "STOP_FLINK"
+    #run "STOP_JMX_COLLECTOR"
     run "STOP_KAFKA"
   fi
 }
