@@ -25,7 +25,7 @@ public class SinkMain {
     }
 
     public static void mySinkTo(DataStream inputStream, CommandLine opt, String identifier) {
-        SingleOutputStreamOperator inputStreamString = inputStream.map( i -> i.toString() + "," + System.currentTimeMillis());
+        SingleOutputStreamOperator inputStreamString = inputStream.map(i -> i.toString() + "," + System.currentTimeMillis());
         if (opt.getOptionValue("sink-type").equals("kafka")) {
             String kafkaBootstrapServer = opt.getOptionValue("sink-bootstrap-server", "localhost:9092");
             Main.MAIN_LOGGER.info("Writing output to Kafka-topic:{}, Kafka-Bootstrap-Server:{}", identifier, kafkaBootstrapServer);

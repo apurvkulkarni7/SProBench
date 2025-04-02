@@ -16,7 +16,7 @@ import org.apache.flink.streaming.api.windowing.windows.TimeWindow;
 import org.apache.flink.util.Collector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.scadsai.benchmarks.streaming.utils.SensorReading;
+import org.scadsai.benchmarks.streaming.utils.SensorData.SensorReading;
 
 import static org.scadsai.benchmarks.streaming.utils.Tools.roundOfThree;
 
@@ -48,8 +48,8 @@ public class Transformations {
     public static class TemperatureConvertorDetector implements MapFunction<SensorReading, SensorReading> {
         @Override
         public SensorReading map(SensorReading inputStream) throws Exception {
-            inputStream.aboveThreashold = inputStream.temperature > 70;
-            inputStream.temperature = roundOfThree((inputStream.temperature * 9 / 5) + 32);
+            inputStream.setAboveThreashold(inputStream.getTemperature() > 70);
+            inputStream.setTemperature(roundOfThree((inputStream.getTemperature() * 9 / 5) + 32));
             return inputStream;
         }
     }
@@ -67,9 +67,9 @@ public class Transformations {
 
 
     public static class MovingAverageFlatMap extends RichMapFunction<
-                SensorReading, // Input: (timestamp, sensor_id, temperature, boolean)
-                SensorReading // Output: (timestamp, sensor_id, temperature, boolean, moving_avg)
-                > {
+            SensorReading, // Input: (timestamp, sensor_id, temperature, boolean)
+            SensorReading // Output: (timestamp, sensor_id, temperature, boolean, moving_avg)
+            > {
 
         private transient ValueState<Tuple2<Double, Integer>> sumCountState;
 
@@ -77,7 +77,7 @@ public class Transformations {
         public void open(Configuration parameters) {
             ValueStateDescriptor<Tuple2<Double, Integer>> descriptor =
                     new ValueStateDescriptor<>(
-                            "sumCountState", Types.TUPLE(Types.DOUBLE,Types.INT)
+                            "sumCountState", Types.TUPLE(Types.DOUBLE, Types.INT)
                     );
             sumCountState = getRuntimeContext().getState(descriptor);
         }
@@ -91,11 +91,11 @@ public class Transformations {
             }
 
             // Update sum and count
-            current.f0 += input.temperature; // Temperature
+            current.f0 += input.getTemperature(); // Temperature
             current.f1 += 1;
 
             // Compute moving average
-            input.movingAverage = roundOfThree(current.f0 / current.f1);
+            //input.average = roundOfThree(current.f0 / current.f1);
             sumCountState.update(current);
             return input;
         }

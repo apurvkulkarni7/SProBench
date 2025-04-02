@@ -13,10 +13,10 @@ import org.apache.logging.log4j.Logger;
 import org.scadsai.benchmarks.streaming.flink.sinks.SinkMain;
 import org.scadsai.benchmarks.streaming.flink.sources.SourceMain;
 import org.scadsai.benchmarks.streaming.flink.utils.MetricLoggerMap;
-import org.scadsai.benchmarks.streaming.utils.OptionsGenerator;
 import org.scadsai.benchmarks.streaming.flink.utils.SetupStreamExecEnv;
 import org.scadsai.benchmarks.streaming.flink.utils.Transformations;
-import org.scadsai.benchmarks.streaming.utils.SensorReading;
+import org.scadsai.benchmarks.streaming.utils.OptionsGenerator;
+import org.scadsai.benchmarks.streaming.utils.SensorData.SensorReading;
 
 
 public class Main {

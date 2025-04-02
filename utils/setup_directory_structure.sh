@@ -10,8 +10,8 @@ INIT_CONF_FILE=$3
 if [[ "${ONLY_DATA_GENERATOR}" == "true" ]]; then
   FRAMEWORK="generator"
 fi
-
-case ${FRAMEWORK,,} in
+FRAMEWORK_L=${FRAMEWORK,,}
+case $FRAMEWORK_L in
 flink)
 #if [[ "$TEST_TYPE" == "FLINK" ]]; then
 
@@ -31,6 +31,26 @@ flink)
   export LOG_DIR_RUN_CONFIG_FLINK="${LOG_DIR_RUN_CONFIG}/flink"; # mkdir -p "$LOG_DIR_RUN_CONFIG_FLINK"
   export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
   ;;
+
+kafkastream)  
+  export LOG_DIR_RUN_LOG="${LOG_DIR_RUN}/log"; mkdir -p "$LOG_DIR_RUN_LOG"
+  export LOG_DIR_RUN_LOG_FRAMEWORK="${LOG_DIR_RUN_LOG}/${FRAMEWORK_L}";mkdir -p "$LOG_DIR_RUN_LOG_FRAMEWORK"
+  #export LOG_DIR_RUN_LOG_FRAMEWORK_EVENTS_HIST="${LOG_DIR_RUN_LOG_FRAMEWORK}/events-history"; mkdir -p "$LOG_DIR_RUN_LOG_FRAMEWORK_EVENTS_HIST"
+  export LOG_DIR_RUN_LOG_KAFKA="${LOG_DIR_RUN_LOG}/kafka";mkdir -p "$LOG_DIR_RUN_LOG_KAFKA"
+  export LOG_DIR_RUN_LOG_GENERATOR="${LOG_DIR_RUN_LOG}/generator";mkdir -p "$LOG_DIR_RUN_LOG_GENERATOR"
+  export LOG_DIR_RUN_LOG_JMX="${LOG_DIR_RUN_LOG}/jmx";mkdir -p "$LOG_DIR_RUN_LOG_JMX"
+
+  export FRAMEWORK_CONFIG_TEMPLATE="$BENCHMARK_DIR/framework-config-template"
+  export FRAMEWORK_CONFIG_TEMPLATE_KAFKA="${FRAMEWORK_CONFIG_TEMPLATE}/kafka"
+  export FRAMEWORK_CONFIG_TEMPLATE_FRAMEWORK="${FRAMEWORK_CONFIG_TEMPLATE}/${FRAMEWORK_L}"
+
+  export LOG_DIR_RUN_CONFIG="${LOG_DIR_RUN}/config"; mkdir -p "$LOG_DIR_RUN_CONFIG"
+
+  export LOG_DIR_RUN_CONFIG_FRAMEWORK="${LOG_DIR_RUN_CONFIG}/flink"; # mkdir -p "$LOG_DIR_RUN_CONFIG_FRAMEWORK"
+  export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
+  ;;
+
+
 message_broker|generator)
 # elif [[ "$TEST_TYPE" == "GENERATOR" ]]; then
 

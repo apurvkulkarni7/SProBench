@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="info">
+    <Properties>
+        <Property name="pattern">%m%n</Property>
+        <Property name="logDir">${sys:logDir}</Property>
+        <Property name="mainLogFileName">${sys:mainLogFileName:-deleteme}</Property>
+        <Property name="metric">${sys:metricLogFileName:-deleteme}</Property>
+    </Properties>
+    <Appenders>
+        <File name="MainAppender" fileName="${logDir}/${mainLogFileName}" append="false">
+            <PatternLayout pattern="[%d{ISO8601}] %p %c{1} - ${pattern}"/>
+        </File>
+        <File name="MetricAppender" fileName="${logDir}/${metricLogFileName}" append="false">
+            <PatternLayout pattern="${pattern}"/>
+        </File>
+    </Appenders>
+    <Loggers>
+        <Root level="info" additivity="false">
+            <AppenderRef ref="MainAppender"/>
+        </Root>
+        <Logger name="main" level="info" additivity="false">
+            <AppenderRef ref="MainAppender"/>
+        </Logger>
+        <Logger name="metric" level="info" additivity="false">
+            <AppenderRef ref="MetricAppender"/>
+        </Logger>
+    </Loggers>
+</Configuration>

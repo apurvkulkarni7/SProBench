@@ -56,26 +56,39 @@ generator:
 # Processor Settings
 ##############################
 #
-# The following settings are used to configure the processing framework used in
-# the benchmarking process. Following options won't work if 'only_data_generator'
-# set to 'true'.
-# - processing_type: The type of processing used in the benchmark
-#   (P0: passthrough, P1: CPU-intensive, P2: Memory intensive).
-# - processing_framework: The framework used for processing
-#   (message_broker, flink, spark, kafkastream)
-# - parallelism_per_worker: The parallelism per worker. By default 1 CPU per
-#   parallelism pipeline is used.
-# - num_cpus_master: The number of CPUs allocated to the master node.
-# - num_cpus_spare: The number of spare CPUs for other auxiliary processes on
-#   all nodes.
-# - num_workers: The number of worker nodes.
-# - mem_node_master: The memory allocated to the master node in GB.
-# - mem_node_worker: The memory allocated to each worker node in GB.
-# - mem_node_spare: The spare memory in GB for auxilliary process.
+# Controls the benchmarking stream processing engine. Settings below become
+# inactive when 'only_data_generator' is enabled.
+# - processing_type: Processing Workload Types
+#   - P0: Passthrough (no transformation)
+#   - P1: CPU-intensive processing
+#   - P2: Memory-intensive stateful operations
+# -framework: Supported Frameworks
+#   - message_broker: Basic message routing
+#   - flink         : Apache Flink engine
+#   - spark         : Apache Spark Streaming
+#   - kafkastream   : Kafka Streams API
+# - master: Master node configuration
+#   - cpu       : Number of CPUs for master processes
+#   - memory_gb : Memory in GB for master processes
+# - worker: Worker configuration
+#   - instances    : Number of worker processes in cluster
+#                    (one/physical_node currently)
+#   - parallelism : Parallelism per worker
+#   - memory_gb   : Memory in GB per worker process
+# - stateful_dir: Directory for stateful operations (checkpoints, state storage).
+#                 For P2 processing.
+# - window_length_ms: Total duration of processing window. For P2 processing.
+#                     For P2 processing.
+# - window_advance_ms: Slide interval (tumbling window if equal to length). 
+#                      For P2 processing.
+# - num_cpus_spare: Reserve CPUs per worker node for auxiliary processes (OS, 
+#                   monitoring, etc)
+# - mem_node_spare: Reserve memory (GB) per worker node for system operations
 stream_processor:
-  processing_type: P1
+  processing_type: P2
   framework:
-    - flink
+    #- flink
+    - kafkastream
   master:
     cpu: 1
     memory_gb: 1
@@ -86,6 +99,8 @@ stream_processor:
     parallelism:
       - 1
   stateful_dir: /tmp
+  window_length_ms: 5000
+  window_advance_ms: 5000
 num_cpus_spare: 1
 mem_node_spare: 1
 ##############################

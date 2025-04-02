@@ -80,6 +80,8 @@ public class OptionsGenerator {
             props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
             props.put(StreamsConfig.STATE_DIR_CONFIG, config.getStreamProcessor().getStateDir());
             props.put(StreamsConfig.NUM_STREAM_THREADS_CONFIG, config.getStreamProcessor().getWorker().getParallelism()); // parallelism
+            props.put(StreamsConfig.PROCESSING_GUARANTEE_CONFIG, StreamsConfig.EXACTLY_ONCE_V2); // parallelism
+
             this.properties = props;
 
         } catch (ParseException exp) {

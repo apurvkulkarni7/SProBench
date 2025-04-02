@@ -1,4 +1,4 @@
-package org.util;
+package org.metrics.org.scadsai.benchmarks.metrics.util;
 import org.apache.commons.cli.*;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
