@@ -68,7 +68,7 @@ system_handler_slurm() {
     $SPB_RUN_WORKFLOW_SCRIPT_FULL
     ;;
   slurm_batch)
-    
+
     set_slurm_vars
     echo $HPC_JOB_NAME
     exit 0

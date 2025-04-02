@@ -2,3 +2,6 @@ dependency-reduced-pom.xml
 target/
 frameworks/
 utils/yaml_parser
+.idea/
+.devcontainer/
+doc_res/video_image_project/

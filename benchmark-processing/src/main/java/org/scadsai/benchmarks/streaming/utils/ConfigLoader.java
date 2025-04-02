@@ -4,14 +4,16 @@ import org.yaml.snakeyaml.Yaml;
 
 import java.io.FileInputStream;
 import java.util.ArrayList;
-import java.util.Map;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
 public class ConfigLoader {
 
     private String file;
 
     public ConfigLoader(String file) {
-      this.file = file;
+        this.file = file;
     }
 
     public BenchmarkConfig parser() {
@@ -20,26 +22,27 @@ public class ConfigLoader {
         System.out.println(this.file + " is loading...");
         try {
             FileInputStream inputStream = new FileInputStream(this.file);
-             config = yaml.load(inputStream);
+            config = yaml.load(inputStream);
         } catch (Exception e) {
             throw new RuntimeException(e);
         }
         BenchmarkConfig myConfig = yamlParser(config);
         return myConfig;
     }
+
     public BenchmarkConfig yamlParser(Map<String, Object> config) {
         BenchmarkConfig parsedConfig = new BenchmarkConfig();
         parsedConfig.setDebugMode(Boolean.parseBoolean(config.get("debug_mode").toString()));
-        parsedConfig.setLoggingLevel((int)config.get("logging_level"));
-        parsedConfig.setBenchmarkRuntimeMin((int)config.get("benchmark_runtime_min"));
-        parsedConfig.setMetricLoggingIntervalSec((int)config.get("metric_logging_interval_sec"));
-        parsedConfig.setRunsPerConfiguration((int)config.get("runs_per_configuration"));
-        parsedConfig.setTotalWorkloadHz((int)config.get("total_workload_hz"));
+        parsedConfig.setLoggingLevel((int) config.get("logging_level"));
+        parsedConfig.setBenchmarkRuntimeMin((int) config.get("benchmark_runtime_min"));
+        parsedConfig.setMetricLoggingIntervalSec((int) config.get("metric_logging_interval_sec"));
+        parsedConfig.setRunsPerConfiguration((int) config.get("runs_per_configuration"));
+        parsedConfig.setTotalWorkloadHz((int) config.get("total_workload_hz"));
         parsedConfig.setTmpDir((String) config.get("tmp_dir"));
         parsedConfig.setGenerator((Map<String, Object>) config.get("generator"));
         parsedConfig.setStreamProcessor((Map<String, Object>) config.get("stream_processor"));
-        parsedConfig.setNumCpusSpare((int)config.get("num_cpus_spare"));
-        parsedConfig.setMemNodeSpare((int)config.get("mem_node_spare"));
+        parsedConfig.setNumCpusSpare((int) config.get("num_cpus_spare"));
+        parsedConfig.setMemNodeSpare((int) config.get("mem_node_spare"));
         parsedConfig.setKafka((Map<String, Object>) config.get("kafka"));
         return parsedConfig;
     }
@@ -121,12 +124,12 @@ public class ConfigLoader {
             return generator;
         }
 
-        public void setGenerator(Map<String,Object> generatorRaw) {
+        public void setGenerator(Map<String, Object> generatorRaw) {
             this.generator.setType(generatorRaw.get("type").toString());
-            this.generator.setLoadHz((int)generatorRaw.get("load_hz"));
-            this.generator.setThreadsPerCpuNum((int)generatorRaw.get("threads_per_cpu_num"));
-            this.generator.setMemoryGb((int)generatorRaw.get("memory_gb"));
-            this.generator.setRecordSizeBytes((int)generatorRaw.get("record_size_bytes"));
+            this.generator.setLoadHz((int) generatorRaw.get("load_hz"));
+            this.generator.setThreadsPerCpuNum((int) generatorRaw.get("threads_per_cpu_num"));
+            this.generator.setMemoryGb((int) generatorRaw.get("memory_gb"));
+            this.generator.setRecordSizeBytes((int) generatorRaw.get("record_size_bytes"));
             this.generator.setOnlyDataGenerator(Boolean.parseBoolean(generatorRaw.get("only_data_generator").toString()));
             this.generator.setCpu(Integer.parseInt(generatorRaw.get("cpu").toString()));
         }
@@ -141,6 +144,8 @@ public class ConfigLoader {
             this.streamProcessor.setMaster((Map<String, Object>) streamProcessorRaw.get("master"));
             this.streamProcessor.setWorker((Map<String, Object>) streamProcessorRaw.get("worker"));
             this.streamProcessor.setStateDir(streamProcessorRaw.get("stateful_dir").toString());
+            this.streamProcessor.setWindowLength(Long.parseLong(streamProcessorRaw.get("window_length_ms").toString()));
+            this.streamProcessor.setWindowAdvance(Long.parseLong(streamProcessorRaw.get("window_advance_ms").toString()));
         }
 
         public int getNumCpusSpare() {
@@ -163,27 +168,13 @@ public class ConfigLoader {
             return this.kafka;
         }
 
-        public void setKafka(Map<String,Object> kafkaRaw) {
+        public void setKafka(Map<String, Object> kafkaRaw) {
             this.kafka.setCpu((int) kafkaRaw.get("cpu"));
-            this.kafka.setMemoryGb((int)kafkaRaw.get("memory_gb"));
+            this.kafka.setMemoryGb((int) kafkaRaw.get("memory_gb"));
             this.kafka.setSourceTopics((List) kafkaRaw.get("source_topics"));
             this.kafka.setSinkTopics((List) kafkaRaw.get("sink_topics"));
         }
-//        public Framework getFrameworks() {
-//            return this.frameworks;
-//        }
-//
-//        public void setFrameworks(Map<String, Object> frameworksRaw) {
-//            this.frameworks = frameworks;
-//        }
 
-//        public SlurmSetup getSlurmSetup() {
-//            return slurmSetup;
-//        }
-//
-//        public void setSlurmSetup(SlurmSetup slurmSetup) {
-//            this.slurmSetup = slurmSetup;
-//        }
         @Override
         public String toString() {
             return "Config{" +
@@ -287,8 +278,10 @@ public class ConfigLoader {
         private String processingType;
         private String framework;
         private String stateDir = "/tmp";
-        private Master master= new Master();
+        private Master master = new Master();
         private Worker worker = new Worker();
+        private long windowLengthMs;
+        private long windowAdvanceMs;
 
         // Getters and setters
         public String getProcessingType() {
@@ -343,6 +336,22 @@ public class ConfigLoader {
                     ", worker=" + worker +
                     ", stateDir=" + stateDir +
                     '}';
+        }
+
+        public void setWindowLength(long windowLengthMs) {
+            this.windowLengthMs = windowLengthMs;
+        }
+
+        public long getWindowLength() {
+            return this.windowLengthMs;
+        }
+
+        public void setWindowAdvance(long windowAdvanceMs) {
+            this.windowAdvanceMs = windowAdvanceMs;
+        }
+
+        public long getWindowAdvance() {
+            return this.windowAdvanceMs;
         }
     }
 
@@ -443,8 +452,8 @@ public class ConfigLoader {
             return sourceTopics;
         }
 
-        public void setSourceTopics(List<Map<String,Object>> sourceTopicsRaw) {
-            for (Map<String,Object> sourceTopic_i : sourceTopicsRaw) {
+        public void setSourceTopics(List<Map<String, Object>> sourceTopicsRaw) {
+            for (Map<String, Object> sourceTopic_i : sourceTopicsRaw) {
                 SourceTopic sourceTopic = new SourceTopic();
                 sourceTopic.setName(sourceTopic_i.get("name").toString());
                 sourceTopic.setNumPartition(sourceTopic_i.get("num_partition").toString());
@@ -456,8 +465,8 @@ public class ConfigLoader {
             return sinkTopics;
         }
 
-        public void setSinkTopics(List<Map<String,Object>> sinkTopicsRaw) {
-            for (Map<String,Object> sinkTopic_i : sinkTopicsRaw) {
+        public void setSinkTopics(List<Map<String, Object>> sinkTopicsRaw) {
+            for (Map<String, Object> sinkTopic_i : sinkTopicsRaw) {
                 SinkTopic sinkTopic = new SinkTopic();
                 sinkTopic.setName(sinkTopic_i.get("name").toString());
                 sinkTopic.setNumPartition(sinkTopic_i.get("num_partition").toString());
@@ -465,19 +474,18 @@ public class ConfigLoader {
             }
         }
 
-        public List<String> getSourceTopicNames() {
-            ArrayList<String> topicNames = new ArrayList<>();
-            for (SourceTopic topic_i : getSourceTopics()) {
-                topicNames.add(topic_i.getName());
-            }
-            return topicNames;
+        public <T extends Topic> String getTopicNames(List<T> topics) {
+            return topics.stream()
+                    .map(Topic::getName)
+                    .collect(Collectors.joining(","));
         }
-        public List<String> getSinkTopicNames() {
-            ArrayList<String> topicNames = new ArrayList<>();
-            for (SinkTopic topic_i : getSinkTopics()) {
-                topicNames.add(topic_i.getName());
-            }
-            return topicNames;
+
+        public String getSourceTopicNames() {
+            return getTopicNames(getSourceTopics());
+        }
+
+        public String getSinkTopicNames() {
+            return getTopicNames(getSinkTopics());
         }
 
         @Override
@@ -491,192 +499,53 @@ public class ConfigLoader {
         }
     }
 
-    public class SourceTopic {
+    public interface Topic {
+        String getName();
+
+        void setName(String name);
+
+        String getNumPartition();
+
+        void setNumPartition(String numPartition);
+    }
+
+    public abstract class AbstractTopic implements Topic {
         private String name;
         private String numPartition;
 
-        // Getters and setters
+        @Override
         public String getName() {
             return name;
         }
 
+        @Override
         public void setName(String name) {
             this.name = name;
         }
 
+        @Override
         public String getNumPartition() {
             return numPartition;
         }
 
+        @Override
         public void setNumPartition(String numPartition) {
             this.numPartition = numPartition;
         }
 
         @Override
         public String toString() {
-            return "SourceTopic{" +
+            return getClass().getSimpleName() + "{" +
                     "name='" + name + '\'' +
                     ", numPartition='" + numPartition + '\'' +
                     '}';
         }
     }
 
-    public class SinkTopic {
-        private String name;
-        private String numPartition;
-
-        // Getters and setters
-        public String getName() {
-            return name;
-        }
-
-        public void setName(String name) {
-            this.name = name;
-        }
-
-        public String getNumPartition() {
-            return numPartition;
-        }
-
-        public void setNumPartition(String numPartition) {
-            this.numPartition = numPartition;
-        }
-
-        @Override
-        public String toString() {
-            return "SinkTopic{" +
-                    "name='" + name + '\'' +
-                    ", numPartition='" + numPartition + '\'' +
-                    '}';
-        }
+    public class SourceTopic extends AbstractTopic {
     }
 
-    //    class Framework {
-//        private String version;
-//        private LocalSetup localSetup;
-//        private SlurmSetup slurmSetup;
-//        private List<String> customModulePath;
-//
-//        // Getters and setters
-//        public String getVersion() {
-//            return version;
-//        }
-//
-//        public void setVersion(String version) {
-//            this.version = version;
-//        }
-//
-//        public LocalSetup getLocalSetup() {
-//            return localSetup;
-//        }
-//
-//        public void setLocalSetup(LocalSetup localSetup) {
-//            this.localSetup = localSetup;
-//        }
-//
-//        public SlurmSetup getSlurmSetup() {
-//            return slurmSetup;
-//        }
-//
-//        public void setSlurmSetup(SlurmSetup slurmSetup) {
-//            this.slurmSetup = slurmSetup;
-//        }
-//
-//        public List<String> getCustomModulePath() {
-//            return customModulePath;
-//        }
-//
-//        public void setCustomModulePath(List<String> customModulePath) {
-//            this.customModulePath = customModulePath;
-//        }
-//    }
-//
-//    class LocalSetup {
-//        private String path;
-//
-//        // Getters and setters
-//        public String getPath() {
-//            return path;
-//        }
-//
-//        public void setPath(String path) {
-//            this.path = path;
-//        }
-//    }
-//
-//    class SlurmSetup {
-//        private boolean useModuleSystem;
-//        private String moduleNameVersion;
-//        private List<String> dependentModules;
-//        private String path;
-//        private String project;
-//        private boolean exclusiveJobs;
-//        private boolean chainedJobs;
-//        private boolean multithreading;
-//
-//        // Getters and setters
-//        public boolean isUseModuleSystem() {
-//            return useModuleSystem;
-//        }
-//
-//        public void setUseModuleSystem(boolean useModuleSystem) {
-//            this.useModuleSystem = useModuleSystem;
-//        }
-//
-//        public String getModuleNameVersion() {
-//            return moduleNameVersion;
-//        }
-//
-//        public void setModuleNameVersion(String moduleNameVersion) {
-//            this.moduleNameVersion = moduleNameVersion;
-//        }
-//
-//        public List<String> getDependentModules() {
-//            return dependentModules;
-//        }
-//
-//        public void setDependentModules(List<String> dependentModules) {
-//            this.dependentModules = dependentModules;
-//        }
-//
-//        public String getPath() {
-//            return path;
-//        }
-//
-//        public void setPath(String path) {
-//            this.path = path;
-//        }
-//
-//        public String getProject() {
-//            return project;
-//        }
-//
-//        public void setProject(String project) {
-//            this.project = project;
-//        }
-//
-//        public boolean isExclusiveJobs() {
-//            return exclusiveJobs;
-//        }
-//
-//        public void setExclusiveJobs(boolean exclusiveJobs) {
-//            this.exclusiveJobs = exclusiveJobs;
-//        }
-//
-//        public boolean isChainedJobs() {
-//            return chainedJobs;
-//        }
-//
-//        public void setChainedJobs(boolean chainedJobs) {
-//            this.chainedJobs = chainedJobs;
-//        }
-//
-//        public boolean isMultithreading() {
-//            return multithreading;
-//        }
-//
-//        public void setMultithreading(boolean multithreading) {
-//            this.multithreading = multithreading;
-//        }
-//    }
+    public class SinkTopic extends AbstractTopic {
+    }
+
 }

@@ -1,9 +1,9 @@
-package org.metrics;
+package org.metrics.org.scadsai.benchmarks.metrics;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.util.CliParamGenerator;
+import org.metrics.org.scadsai.benchmarks.metrics.util.CliParamGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -12,8 +12,8 @@ import java.lang.management.RuntimeMXBean;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.util.MetricUtil.jvmMetricExtractorRunner;
-import static org.util.MetricUtil.setLoggerProperties;
+import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.jvmMetricExtractorRunner;
+import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.setLoggerProperties;
 
 public class JVMMetricExtractor {
     public static void main(String[] args) {

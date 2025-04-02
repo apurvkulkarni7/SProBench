@@ -41,7 +41,9 @@ public class KafkaConfig {
         this.sink_topics = sink_topics;
     }
 
-    public String getStateful_directory() { return stateful_directory; }
+    public String getStateful_directory() {
+        return stateful_directory;
+    }
 
     public void setStateful_directory(String stateful_directory) {
         this.stateful_directory = stateful_directory;

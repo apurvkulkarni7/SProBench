@@ -2,12 +2,10 @@
 set -e
 trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
 
-
-
 # Define usage
 usage() {
-  echo "Usage: $0 [hpc_node|localmachine] [TOPIC]"
-  echo "  hpc_node|localmachine : Environment type"
+  echo "Usage: $0 [hpc_node|localhost] [TOPIC]"
+  echo "  hpc_node|localhost : Environment type"
   echo "  TOPIC                 : Kafka TOPIC name (default: eventsIn)"
 }
 
@@ -17,20 +15,18 @@ if [ $# -lt 1 ] || [ $# -gt 2 ]; then
 else
   # Define variables
   CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
-  SPB_SYSTEM=$1
-  TOPIC=${2:-"eventsIn"}
-
-  KAFKA_NODE="localhost"
-  if [[ ! "$SPB_SYSTEM" == "localmachine" ]]; then
-    KAFKA_NODE=$1
+  KAFKA_NODE=${2:-"localhost"}
+  TOPIC=${1:-"eventsIn"}
+  echo $CURR_DIR
+  if [[ "$KAFKA_NODE" == "localhost" ]]; then
+    SPB_SYSTEM='localmachine'
   fi
 
-  TOPIC=${2:-"eventsIn"}
+  TOPIC=${1:-"eventsIn"}
 
+   
   if [[ "$SPB_SYSTEM" == "localmachine" ]]; then
-
-    ./frameworks/kafka/bin/kafka-console-consumer.sh --from-beginning --topic $TOPIC --bootstrap-server $KAFKA_NODE:9092
-
+    "${CURR_DIR}/../../frameworks/kafka/bin/kafka-console-consumer.sh" --from-beginning --topic "$TOPIC" --bootstrap-server "${KAFKA_NODE}:9092"
   else
     source "${CURR_DIR}/../utils.sh"
     TMP_DIR=./tmp/kafka_tmp

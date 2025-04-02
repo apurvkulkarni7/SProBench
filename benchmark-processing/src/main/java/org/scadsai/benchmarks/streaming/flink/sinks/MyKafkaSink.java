@@ -21,9 +21,9 @@ public class MyKafkaSink {
                 .<String>builder()
                 .setBootstrapServers(bootstrapServer)
                 .setDeliveryGuarantee(DeliveryGuarantee.EXACTLY_ONCE)
-                .setProperty("batch.size","500000")
-                .setProperty("linger.ms","1")
-                .setProperty("compression.type","lz4")
+                .setProperty("batch.size", "500000")
+                .setProperty("linger.ms", "1")
+                .setProperty("compression.type", "lz4")
                 .setRecordSerializer(
                         KafkaRecordSerializationSchema
                                 .builder()
