@@ -110,7 +110,12 @@ run() {
     logger_info "Kafkastream processing started"
   elif [[ "STOP_KAFKASTREAM_PROCESSING" == "$OPERATION" ]]; then
     stop_if_needed MainKafkastream MainKafkastream
-
+  ##############################################################################
+  # Processing - Spark structured Streaming
+  ##############################################################################
+  elif [[ "START_SPARK_CLUSTER" == "$OPERATION" ]]; then
+    check_var SPARK_HOME
+    ${SPARK_HOME}/sbin/start-all.sh
   ##############################################################################
   # Generator
   ##############################################################################
@@ -260,6 +265,19 @@ run() {
     $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
     run "STOP_KAFKASTREAM_PROCESSING"
     run "STOP_KAFKA"
+  elif [[ "SPARKSTRUCSTREAM_TEST_START" == "$OPERATION" ]]; then
+    # run "START_KAFKA"
+    run "START_SPARK_CLUSTER"
+    # run "START_SPARK_PROCESSING"
+    # run "START_LOAD"
+    # $JAVA_HOME/bin/jps >$LOG_DIR_RUN_LOG/running_java_proceses
+    # logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    # sleep "${BENCHMARK_RUNTIME_MIN}m"
+    # logger_info "Completed running benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    # echo "==" >>$LOG_DIR_RUN_LOG/running_java_proceses
+    # $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
+    # run "STOP_SPARK_CLUSTER"
+    # run "STOP_KAFKA"
   fi
 }
 

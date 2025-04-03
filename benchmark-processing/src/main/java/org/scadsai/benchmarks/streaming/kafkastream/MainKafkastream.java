@@ -37,7 +37,7 @@ public class MainKafkastream {
         KStream<String, String> sourceStream = builder.stream(config.getKafka().getSourceTopicNames());
 
         // Process the stream based on the processing type
-        processStream(sourceStream, properties, config);
+        processStream(sourceStream, config);
 
         // Create a Kafka Streams instance
         KafkaStreams streams = new KafkaStreams(builder.build(), properties);
@@ -46,7 +46,7 @@ public class MainKafkastream {
         streams.start();
     }
 
-    private static void processStream(KStream<String, String> sourceStream, Properties properties, BenchmarkConfig config) {
+    private static void processStream(KStream<String, String> sourceStream, BenchmarkConfig config) {
         String processingType = config.getStreamProcessor().getProcessingType();
         if (processingType.equals("P0")) {
             sourceStream

@@ -1,19 +1,33 @@
 #!/bin/bash
 set -e
 
-export LOG_DIR_RUN=$1
+check_var LOG_DIR_RUN
+check_file INIT_CONF_FILE
+check_var ONLY_DATA_GENERATOR
+check_var FRAMEWORK
+
 mkdir -p $LOG_DIR_RUN
 
-TEST_TYPE=$2
-INIT_CONF_FILE=$3
+declare -A EXP_DIR
 
 if [[ "${ONLY_DATA_GENERATOR}" == "true" ]]; then
   FRAMEWORK="generator"
 fi
 FRAMEWORK_L=${FRAMEWORK,,}
 case $FRAMEWORK_L in
+messagebroker|generator)
+  export LOG_DIR_RUN_LOG="${LOG_DIR_RUN}/log"; mkdir -p "$LOG_DIR_RUN_LOG"
+  export LOG_DIR_RUN_LOG_KAFKA="${LOG_DIR_RUN_LOG}/kafka";mkdir -p "$LOG_DIR_RUN_LOG_KAFKA"
+  export LOG_DIR_RUN_LOG_GENERATOR="${LOG_DIR_RUN_LOG}/generator";mkdir -p "$LOG_DIR_RUN_LOG_GENERATOR"
+  export LOG_DIR_RUN_LOG_JMX="${LOG_DIR_RUN_LOG}/jmx";mkdir -p "$LOG_DIR_RUN_LOG_JMX"
+
+  export FRAMEWORK_CONFIG_TEMPLATE="$BENCHMARK_DIR/framework-config-template"
+  export FRAMEWORK_CONFIG_TEMPLATE_KAFKA="$FRAMEWORK_CONFIG_TEMPLATE/kafka"
+
+  export LOG_DIR_RUN_CONFIG="${LOG_DIR_RUN}/config"; mkdir -p "$LOG_DIR_RUN_CONFIG"
+  export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
+  ;;
 flink)
-#if [[ "$TEST_TYPE" == "FLINK" ]]; then
 
   export LOG_DIR_RUN_LOG="${LOG_DIR_RUN}/log"; mkdir -p "$LOG_DIR_RUN_LOG"
   export LOG_DIR_RUN_LOG_FLINK="${LOG_DIR_RUN_LOG}/flink";mkdir -p "$LOG_DIR_RUN_LOG_FLINK"
@@ -32,10 +46,9 @@ flink)
   export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
   ;;
 
-kafkastream)  
+kafkastream)
   export LOG_DIR_RUN_LOG="${LOG_DIR_RUN}/log"; mkdir -p "$LOG_DIR_RUN_LOG"
   export LOG_DIR_RUN_LOG_FRAMEWORK="${LOG_DIR_RUN_LOG}/${FRAMEWORK_L}";mkdir -p "$LOG_DIR_RUN_LOG_FRAMEWORK"
-  #export LOG_DIR_RUN_LOG_FRAMEWORK_EVENTS_HIST="${LOG_DIR_RUN_LOG_FRAMEWORK}/events-history"; mkdir -p "$LOG_DIR_RUN_LOG_FRAMEWORK_EVENTS_HIST"
   export LOG_DIR_RUN_LOG_KAFKA="${LOG_DIR_RUN_LOG}/kafka";mkdir -p "$LOG_DIR_RUN_LOG_KAFKA"
   export LOG_DIR_RUN_LOG_GENERATOR="${LOG_DIR_RUN_LOG}/generator";mkdir -p "$LOG_DIR_RUN_LOG_GENERATOR"
   export LOG_DIR_RUN_LOG_JMX="${LOG_DIR_RUN_LOG}/jmx";mkdir -p "$LOG_DIR_RUN_LOG_JMX"
@@ -45,29 +58,33 @@ kafkastream)
   export FRAMEWORK_CONFIG_TEMPLATE_FRAMEWORK="${FRAMEWORK_CONFIG_TEMPLATE}/${FRAMEWORK_L}"
 
   export LOG_DIR_RUN_CONFIG="${LOG_DIR_RUN}/config"; mkdir -p "$LOG_DIR_RUN_CONFIG"
-
-  export LOG_DIR_RUN_CONFIG_FRAMEWORK="${LOG_DIR_RUN_CONFIG}/flink"; # mkdir -p "$LOG_DIR_RUN_CONFIG_FRAMEWORK"
   export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
   ;;
 
+sparkstrucstream)
 
-message_broker|generator)
-# elif [[ "$TEST_TYPE" == "GENERATOR" ]]; then
+  FRAMEWORK_CONFIG_TEMPLATE="$BENCHMARK_DIR/framework-config-template"
+  EXP_DIR['FRAMEWORK_CONFIG_TEMPLATE']="${FRAMEWORK_CONFIG_TEMPLATE}/${FRAMEWORK_L}"
+  EXP_DIR['FRAMEWORK_CONFIG_TEMPLATE_KAFKA']="${FRAMEWORK_CONFIG_TEMPLATE}/kafka"
+  EXP_DIR['LOG_DIR_RUN_LOG']="${LOG_DIR_RUN}/log"
+  EXP_DIR['LOG_DIR_RUN_LOG_FRAMEWORK']="${EXP_DIR['LOG_DIR_RUN_LOG']}/${FRAMEWORK_L}"
+  EXP_DIR['LOG_DIR_RUN_LOG_FRAMEWORK_LOCAL_DIR']="${EXP_DIR['LOG_DIR_RUN_LOG_FRAMEWORK']}/local"
+  EXP_DIR['LOG_DIR_RUN_LOG_FRAMEWORK_EVENTS_HIST']="${EXP_DIR['LOG_DIR_RUN_LOG_FRAMEWORK']}/events-history"
+  EXP_DIR['LOG_DIR_RUN_LOG_KAFKA']="${EXP_DIR['LOG_DIR_RUN_LOG']}/kafka"
+  EXP_DIR['LOG_DIR_RUN_LOG_GENERATOR']="${EXP_DIR['LOG_DIR_RUN_LOG']}/generator"
+  EXP_DIR['LOG_DIR_RUN_LOG_JMX']="${EXP_DIR['LOG_DIR_RUN_LOG']}/jmx"
+  EXP_DIR['LOG_DIR_RUN_CONFIG']="${LOG_DIR_RUN}/config"
+  EXP_DIR['LOG_DIR_RUN_CONFIG_FRAMEWORK']="${EXP_DIR['LOG_DIR_RUN_CONFIG']}/${FRAMEWORK_L}"
+  EXP_DIR['LOG_DIR_RUN_CONFIG_KAFKA']="${EXP_DIR['LOG_DIR_RUN_CONFIG']}/kafka"
 
-  export LOG_DIR_RUN_LOG="${LOG_DIR_RUN}/log"; mkdir -p "$LOG_DIR_RUN_LOG"
-  export LOG_DIR_RUN_LOG_KAFKA="${LOG_DIR_RUN_LOG}/kafka";mkdir -p "$LOG_DIR_RUN_LOG_KAFKA"
-  export LOG_DIR_RUN_LOG_GENERATOR="${LOG_DIR_RUN_LOG}/generator";mkdir -p "$LOG_DIR_RUN_LOG_GENERATOR"
-  export LOG_DIR_RUN_LOG_JMX="${LOG_DIR_RUN_LOG}/jmx";mkdir -p "$LOG_DIR_RUN_LOG_JMX"
-
-  export FRAMEWORK_CONFIG_TEMPLATE="$BENCHMARK_DIR/framework-config-template"
-  export FRAMEWORK_CONFIG_TEMPLATE_KAFKA="$FRAMEWORK_CONFIG_TEMPLATE/kafka"
-
-  export LOG_DIR_RUN_CONFIG="${LOG_DIR_RUN}/config"; mkdir -p "$LOG_DIR_RUN_CONFIG"
-  export LOG_DIR_RUN_CONFIG_KAFKA="${LOG_DIR_RUN_CONFIG}/kafka"; # mkdir -p "$LOG_DIR_RUN_CONFIG_KAFKA"
+  for dir in "${!EXP_DIR[@]}"; do
+    mkdir -p "${EXP_DIR[$dir]}"
+    export "$dir=${EXP_DIR[$dir]}"
+  done
   ;;
-# fi
+
 esac
-# Copying yaml config
+
+# Copying yaml config for the run
 cp "$INIT_CONF_FILE" "$LOG_DIR_RUN_CONFIG/config.yaml"
 export CONF_FILE_RUN="$LOG_DIR_RUN_CONFIG/config.yaml"
-

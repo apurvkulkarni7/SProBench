@@ -430,6 +430,8 @@ public class ConfigLoader {
         private int memoryGb;
         private List<SourceTopic> sourceTopics = new ArrayList<>();
         private List<SinkTopic> sinkTopics = new ArrayList<>();
+        private String sourceBootstrapServer;
+        private String sinkBootstrapServer;
 
         // Getters and setters
         public int getCpu() {
@@ -488,6 +490,22 @@ public class ConfigLoader {
             return getTopicNames(getSinkTopics());
         }
 
+        public void setSourceBootstrapServer(String sourceBootstrapServers) {
+            this.sourceBootstrapServer = sourceBootstrapServers;
+        }
+
+        public String getSourceBootstrapServer() {
+            return this.sourceBootstrapServer;
+        }
+
+        public String getSinkBootstrapServer() {
+            return sinkBootstrapServer;
+        }
+
+        public void setSinkBootstrapServer(String sinkBootstrapServer) {
+            this.sinkBootstrapServer = sinkBootstrapServer;
+        }
+
         @Override
         public String toString() {
             return "Kafka{" +
@@ -495,6 +513,8 @@ public class ConfigLoader {
                     ", memoryGb='" + memoryGb + '\'' +
                     ", SourceTopics='" + sourceTopics + '\'' +
                     ", SinkTopics='" + sinkTopics + '\'' +
+                    ", SourceBootstrapServer='" + sourceBootstrapServer + '\'' +
+                    ", SinkBootstrapServer='" + sinkBootstrapServer + '\'' +
                     '}';
         }
     }

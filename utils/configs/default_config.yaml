@@ -63,7 +63,7 @@ generator:
 #   - P1: CPU-intensive processing
 #   - P2: Memory-intensive stateful operations
 # -framework: Supported Frameworks
-#   - message_broker: Basic message routing
+#   - messagebroker : Basic message routing
 #   - flink         : Apache Flink engine
 #   - spark         : Apache Spark Streaming
 #   - kafkastream   : Kafka Streams API
@@ -88,7 +88,8 @@ stream_processor:
   processing_type: P2
   framework:
     #- flink
-    - kafkastream
+    # - kafkastream
+    - sparkstrucstream
   master:
     cpu: 1
     memory_gb: 1

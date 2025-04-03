@@ -6,6 +6,15 @@ check_var SPB_SYSTEM
 check_var FRAMEWORK
 check_directory BENCHMARK_DIR
 
+# Mapping sparkstrucstream -> spark
+if [[ $FRAMEWORK =~ (sparkstrucstream|SPARKSTRUCSTREAM) ]]; then
+  FRAMEWORK_MAIN='spark'
+else
+  FRAMEWORK_MAIN=$FRAMEWORK
+fi
+export FRAMEWORK_MAIN_L=${FRAMEWORK_MAIN,,}
+export FRAMEWORK_MAIN_U=${FRAMEWORK_MAIN^^}
+
 case ${SPB_SYSTEM} in
 
 localmachine)
@@ -18,9 +27,9 @@ localmachine)
   done
 
   # loading stream processing
-  FRAMEWORK_HOME=$($YQ '.frameworks.'${FRAMEWORK,,}'.local_setup.path' $CONF_FILE_RUN)
-  if [[ $FRAMEWORK_HOME == 'default' ]]; then FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${FRAMEWORK,,}";  fi
-  export ${FRAMEWORK^^}_HOME=$FRAMEWORK_HOME
+  FRAMEWORK_HOME=$($YQ '.frameworks.'${FRAMEWORK_MAIN_L}'.local_setup.path' $CONF_FILE_RUN)
+  if [[ $FRAMEWORK_HOME == 'default' ]]; then FRAMEWORK_HOME="${BENCHMARK_DIR}/frameworks/${FRAMEWORK_MAIN_L}";  fi
+  export ${FRAMEWORK_MAIN_U}_HOME=$FRAMEWORK_HOME
 
   ;;
 
@@ -50,8 +59,8 @@ slurm_interactive | slurm_batch)
   done
 
   # Load stream processing framework
-  logger_info "Loading stream processing framework (${FRAMEWORK,,}) module."
-  load_modules $($YQ '.frameworks["'"${FRAMEWORK,,}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
+  logger_info "Loading stream processing framework (${FRAMEWORK_MAIN_L}) module."
+  load_modules $($YQ '.frameworks["'"${FRAMEWORK_MAIN_L}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
 
   # Set some environment variables
   if [[ -z $JAVA_HOME ]]; then
@@ -66,7 +75,7 @@ slurm_interactive | slurm_batch)
 
   [[ $(check_var KAFKA_HOME) ]] && logger_error "Kafka module not available." && exit 1
 
-  case ${FRAMEWORK,,} in
+  case ${FRAMEWORK_MAIN_L} in
   flink)
     ((check_var FLINK_ROOT_DIR 2>&1 > /dev/null) || (check_var FLINK_HOME 2>&1 >/dev/null)) || \
       { logger_error "Flink module not loaded correctly." && exit 1; }

@@ -26,7 +26,7 @@
         <flink.version>1.19.1</flink.version>
         <spark.version>3.5.3</spark.version>
         <scala.version>2.13.12</scala.version>
-        <scala.binary.version>2.13</scala.binary.version>
+        <scala.binary.version>2.12</scala.binary.version>
         <json.version>20220320</json.version>
         <simple.json.version>1.1.1</simple.json.version>
         <slf4j.version>1.7.36</slf4j.version>
@@ -121,19 +121,17 @@
                 <artifactId>spark-core_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
             </dependency>
-            <!-- Spark Streaming -->
+            <!-- Spark Structured Streaming -->
             <dependency>
                 <groupId>org.apache.spark</groupId>
-                <artifactId>spark-streaming_${scala.binary.version}</artifactId>
+                <artifactId>spark-sql_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
             </dependency>
-            <!-- Spark Streaming Kafka Integration -->
             <dependency>
                 <groupId>org.apache.spark</groupId>
-                <artifactId>spark-streaming-kafka-0-10_${scala.binary.version}</artifactId>
+                <artifactId>spark-sql-kafka-0-10_${scala.binary.version}</artifactId>
                 <version>${spark.version}</version>
             </dependency>
-
 
 
             <dependency>

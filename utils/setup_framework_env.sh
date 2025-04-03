@@ -3,39 +3,40 @@ set -e
 
 check_var SPB_SYSTEM
 check_var FRAMEWORK
-
-FRAMEWORK_L=${FRAMEWORK,,}
-FRAMEWORK_U=${FRAMEWORK^^}
+check_var FRAMEWORK_MAIN_L
+check_var FRAMEWORK_MAIN_U
 
 # Copy configuration from template directory
 case $SPB_SYSTEM in
 localmachine)
   cp -r $FRAMEWORK_CONFIG_TEMPLATE_KAFKA $LOG_DIR_RUN_CONFIG/
-  if [[ "$FRAMEWORK" == "FLINK" ]]; then
-    cp -r $FRAMEWORK_CONFIG_TEMPLATE_FLINK $LOG_DIR_RUN_CONFIG/
-  fi
-
+  case $FRAMEWORK_MAIN_L in
+  flink) cp -r $FRAMEWORK_CONFIG_TEMPLATE_FLINK $LOG_DIR_RUN_CONFIG/ ;;
+  spark) cp -r $FRAMEWORK_CONFIG_TEMPLATE $LOG_DIR_RUN_CONFIG/ ;;
+  esac
   NODE_LIST="localhost"
+  NODE_LIST="myworkstation"
   ;;
 slurm_interactive | slurm_batch)
   source framework-configure.sh --framework kafka --template $FRAMEWORK_CONFIG_TEMPLATE_KAFKA --destination $LOG_DIR_RUN_CONFIG
+
   # Initialize framework configuration
-  FRAMEWORK_CONFIG_TEMPLATE="FRAMEWORK_CONFIG_TEMPLATE_${FRAMEWORK^^}" # Construct the variable name
-  source framework-configure.sh --framework ${FRAMEWORK,,} --template ${!FRAMEWORK_CONFIG_TEMPLATE} --destination $LOG_DIR_RUN_CONFIG
+  FRAMEWORK_CONFIG_TEMPLATE="FRAMEWORK_CONFIG_TEMPLATE_${FRAMEWORK_MAIN_U}" # Construct the variable name
+  source framework-configure.sh --framework ${FRAMEWORK_MAIN_L} --template ${!FRAMEWORK_CONFIG_TEMPLATE} --destination $LOG_DIR_RUN_CONFIG
 
   NODE_LIST=$(scontrol show hostname $SLURM_NODELIST | sort -u)
   ;;
 esac
 export NODE_LIST=($NODE_LIST)
 
-#export ARCHITECTURE_TYPE=0
+# export ARCHITECTURE_TYPE=0
 logger_info "Total available nodes: ${NODE_LIST[*]}"
 
 #################################################################
 # Framework env configuration
 #################################################################
 
-case $FRAMEWORK_L in
+case $FRAMEWORK_MAIN_L in
 flink)
   export FLINK_MASTER="${NODE_LIST[0]}"
   case $SPB_SYSTEM in
@@ -208,6 +209,60 @@ kafkastream)
   export FRAMEWORK_MASTER_FILE="$LOG_DIR_RUN_CONFIG_FRAMEWORK/masters"
   export FRAMEWORK_WORKERS_FILE="$LOG_DIR_RUN_CONFIG_FRAMEWORK/workers"
   export FRAMEWORK_CONF_YAML_FILE="$LOG_DIR_RUN_CONFIG_FRAMEWORK/flink-conf.yaml"
+  ;;
+spark)
+  export FRAMEWORK_MASTER="${NODE_LIST[0]}"
+  case $SPB_SYSTEM in
+  localmachine)
+    export FRAMEWORK_WORKERS="$FRAMEWORK_MASTER"
+    export FRAMEWORK_WORKERS_NUM="$NUM_WORKERS"
+    export FRAMEWORK_SLOTS_PER_TASKMANAGER="$NUM_CPU_WORKERS"
+    export FRAMEWORK_PARALLELISM_PER_WORKER="$NUM_CPU_WORKERS"
+    export FRAMEWORK_PARALLELISM=$((FRAMEWORK_PARALLELISM_PER_WORKER * FRAMEWORK_WORKERS_NUM))
+    export FRAMEWORK_MEM_MASTER="$MEM_MASTER"
+    export FRAMEWORK_MEM_PER_WORKER="$MEM_NODE_WORKER"
+    export FRAMEWORK_MEM_PER_WORKER_SPARE="$MEM_NODE_WORKER_SPARE"
+    ;;
+  slurm_interactive | slurm_batch)
+    export FRAMEWORK_WORKERS_NUM="$NUM_WORKERS"
+    if [[ "${#NODE_LIST[@]}" -eq 1 ]]; then
+      export FRAMEWORK_WORKERS="$FRAMEWORK_MASTER"
+    else
+      export FRAMEWORK_WORKERS=${NODE_LIST[@]:1}
+    fi
+    export FRAMEWORK_PARALLELISM_PER_WORKER=$NUM_CPU_WORKERS
+    export FRAMEWORK_PARALLELISM=$((FRAMEWORK_PARALLELISM_PER_WORKER * FRAMEWORK_WORKERS_NUM))
+    export FRAMEWORK_MEM_MASTER="${MEM_MASTER}"
+    export FRAMEWORK_MEM_PER_WORKER="${MEM_NODE_WORKER}"
+    export FRAMEWORK_MEM_PER_WORKER_SPARE="${MEM_NODE_WORKER_SPARE}"
+
+    # Memory
+    if [[ -z ${MEM_NODE_WORKER} ]]; then
+      echo "Computing TM memory."
+      total_memory=$(scontrol show jobid $SLURM_JOBID | tr '\n' '\r' | sed 's/\S*.*mem=\([0-9]*\)\w.*\S*/\1\n/g')
+      ((taskmanager_memory = total_memory / $SLURM_JOB_NUM_NODES))
+
+      # Total node memory to be allocated for taskmanager
+      # TODO Currently implemented for 1TM/node. Extend this for multiple TM/node
+      spare_mem_per_node_val=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '\d*')
+      spare_mem_per_node_unit=$(echo $SPARE_MEMORY_PER_NODE | grep -oP '[^\d]*')
+      ((taskmanager_memory = taskmanager_memory - $spare_mem_per_node_val))
+      export FRAMEWORK_MEM_NODE_WORKER="${taskmanager_memory}G" # This is used only when a single taskmanager/node is used
+    fi
+    ;;
+  esac
+  check_directory LOG_DIR_RUN_LOG_FRAMEWORK
+  check_directory LOG_DIR_RUN_CONFIG_FRAMEWORK # not required for kafkastream
+  export FRAMEWORK_MASTER_FILES=(
+    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-submit"
+    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-env.sh"
+    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-defaults.conf"
+  )
+  export FRAMEWORK_WORKERS_FILE="$LOG_DIR_RUN_CONFIG_FRAMEWORK/workers"
+  export FRAMEWORK_CONF_FILES=(
+    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-defaults.conf"
+    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-env.sh"
+    )
   ;;
 esac
 

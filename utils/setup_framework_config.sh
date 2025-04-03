@@ -1,10 +1,10 @@
 #!/bin/bash
-# setup_framework_config.sh [FLINK|SPARK]
 set -e
 
-FRAMEWORK=$1
+check_var FRAMEWORK_MAIN_L
 
-if [[ "$FRAMEWORK" == "FLINK" ]]; then
+case $FRAMEWORK_MAIN_L in
+flink)
   check_directory FLINK_CONF_DIR
 
   # Create/overwrite master file
@@ -47,7 +47,64 @@ if [[ "$FRAMEWORK" == "FLINK" ]]; then
   # Logging interval
   check_var METRIC_LOGGING_INTERVAL_SEC
   sed -i 's|METRIC_LOGGING_INTERVAL_SEC|'METRIC_LOGGING_INTERVAL_SEC'|g' "$FLINK_CONF_YAML_FILE"
-fi
+  ;;
+spark)
+  # Setup master hostname
+  check_file FRAMEWORK_MASTER_FILES
+  for file_i in ${FRAMEWORK_MASTER_FILES[@]}; do
+    sed -i "s!FRAMEWORK_MASTER_NODE!${FRAMEWORK_MASTER}!g" "${file_i}"
+  done
+
+  # Setup worker hostname
+  check_var FRAMEWORK_WORKERS
+  FRAMEWORK_WORKERS=($FRAMEWORK_WORKERS)
+  check_file FRAMEWORK_WORKERS_FILE
+  echo "$(printf '%s\n' "${FRAMEWORK_WORKERS[@]}")" > $FRAMEWORK_WORKERS_FILE
+
+  check_file FRAMEWORK_CONF_FILES
+  for file_i in ${FRAMEWORK_CONF_FILES[@]}; do
+    
+    check_var FRAMEWORK_PARALLELISM_PER_WORKER
+    sed -i 's|FRAMEWORK_PARALLELISM_PER_WORKER|'$FRAMEWORK_PARALLELISM_PER_WORKER'|g' "${file_i}"
+    
+    # Total Parallelism
+    check_var FRAMEWORK_PARALLELISM
+    sed -i 's|FRAMEWORK_PARALLELISM$|'$FRAMEWORK_PARALLELISM'|g' "${file_i}"   
+
+    # Memory configuration
+    # All memory is in 'G' (g)
+    check_var FRAMEWORK_MEM_MASTER
+    check_var FRAMEWORK_MEM_PER_WORKER
+    
+    # G -> g for spark
+    FRAMEWORK_MEM_MASTER_g=${FRAMEWORK_MEM_MASTER,,}
+    FRAMEWORK_MEM_WORKER_g=${FRAMEWORK_MEM_PER_WORKER,,}
+    
+    sed -i 's|FRAMEWORK_MEM_MASTER|'$FRAMEWORK_MEM_MASTER_g'|g' "${file_i}"
+    sed -i 's|FRAMEWORK_MEM_PER_WORKER|'$FRAMEWORK_MEM_WORKER_g'|g' "${file_i}"
+  
+    
+    check_directory LOG_DIR_RUN_CONFIG_FRAMEWORK
+    sed -i 's|FRAMEWORK_CONF_DIR|'$LOG_DIR_RUN_CONFIG_FRAMEWORK'|g' "$file_i"
+    
+    check_directory LOG_DIR_RUN_LOG_FRAMEWORK
+    sed -i 's|FRAMEWORK_LOG_DIR|'$LOG_DIR_RUN_LOG_FRAMEWORK'|g' "$file_i"
+
+    check_directory LOG_DIR_RUN_LOG_FRAMEWORK_LOCAL_DIR
+    sed -i 's|FRAMEWORK_LOCAL_DIR|'$LOG_DIR_RUN_LOG_FRAMEWORK_LOCAL_DIR'|g' "$file_i"
+    
+    # Java env variables env.java.home:
+    check_var JAVA_HOME
+    sed -i 's|FRAMEWORK_JAVA_HOME|'$JAVA_HOME'|g' "$file_i"
+  
+  done
+
+  # Logging interval
+  check_var METRIC_LOGGING_INTERVAL_SEC
+  sed -i 's|METRIC_LOGGING_INTERVAL_SEC|'METRIC_LOGGING_INTERVAL_SEC'|g' "$file_i"
+  ;;
+esac
+
 #----------------------------------------------------------------------
 # Kafka configuration
 #----------------------------------------------------------------------
