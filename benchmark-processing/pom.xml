@@ -249,6 +249,14 @@
                                     <mainClass>org.scadsai.benchmarks.streaming.flink.Main
                                     </mainClass>
                                 </transformer>
+                                <!-- Following is important to create an uber jar for spark streaming with kafka source-->
+                                <!-- Source: https://stackoverflow.com/questions/48011941/why-does-formatkafka-fail-with-failed-to-find-data-source-kafka-even-wi -->
+                                <transformer
+                                implementation="org.apache.maven.plugins.shade.resource.AppendingTransformer">
+                                <resource>
+                                    META-INF/services/org.apache.spark.sql.sources.DataSourceRegister
+                                </resource>
+                            </transformer>
                             </transformers>
                             <filters>
                                 <filter>

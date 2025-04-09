@@ -4,9 +4,9 @@ trap 'echo "Error occurred at line $LINENO. Command: $BASH_COMMAND"' ERR
 
 # Define usage
 usage() {
-  echo "Usage: $0 [hpc_node|localhost] [TOPIC]"
-  echo "  hpc_node|localhost : Environment type"
+  echo "Usage: $0 [TOPIC] [hpc_node|localhost]"
   echo "  TOPIC                 : Kafka TOPIC name (default: eventsIn)"
+  echo "  hpc_node|localhost : Environment type"
 }
 
 # Check arguments
@@ -17,8 +17,8 @@ else
   CURR_DIR=$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")
   KAFKA_NODE=${2:-"localhost"}
   TOPIC=${1:-"eventsIn"}
-  echo $CURR_DIR
-  if [[ "$KAFKA_NODE" == "localhost" ]]; then
+  
+  if [[ "$KAFKA_NODE" == "localhost" ]] || [[ "$KAFKA_NODE" == $(hostname) ]]; then
     SPB_SYSTEM='localmachine'
   fi
 

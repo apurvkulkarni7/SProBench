@@ -9,13 +9,13 @@ flink)
 
   # Create/overwrite master file
   check_file FLINK_MASTER_FILE
-  echo "$FLINK_MASTER:8081" > "${FLINK_MASTER_FILE}"
+  echo "$FLINK_MASTER:8081" >"${FLINK_MASTER_FILE}"
 
   # create workers file with every available node
   check_var FLINK_WORKERS
   FLINK_WORKERS=($FLINK_WORKERS)
   check_file FLINK_WORKERS_FILE
-  echo "$(printf '%s\n' "${FLINK_WORKERS[@]}")" > $FLINK_WORKERS_FILE
+  echo "$(printf '%s\n' "${FLINK_WORKERS[@]}")" >$FLINK_WORKERS_FILE
 
   # flink-conf.yaml
   check_file FLINK_CONF_YAML_FILE
@@ -59,49 +59,49 @@ spark)
   check_var FRAMEWORK_WORKERS
   FRAMEWORK_WORKERS=($FRAMEWORK_WORKERS)
   check_file FRAMEWORK_WORKERS_FILE
-  echo "$(printf '%s\n' "${FRAMEWORK_WORKERS[@]}")" > $FRAMEWORK_WORKERS_FILE
+  echo "$(printf '%s\n' "${FRAMEWORK_WORKERS[@]}")" >$FRAMEWORK_WORKERS_FILE
 
   check_file FRAMEWORK_CONF_FILES
   for file_i in ${FRAMEWORK_CONF_FILES[@]}; do
-    
+
     check_var FRAMEWORK_PARALLELISM_PER_WORKER
     sed -i 's|FRAMEWORK_PARALLELISM_PER_WORKER|'$FRAMEWORK_PARALLELISM_PER_WORKER'|g' "${file_i}"
-    
+
     # Total Parallelism
     check_var FRAMEWORK_PARALLELISM
-    sed -i 's|FRAMEWORK_PARALLELISM$|'$FRAMEWORK_PARALLELISM'|g' "${file_i}"   
-
+    sed -i 's|FRAMEWORK_PARALLELISM|'$FRAMEWORK_PARALLELISM'|g' "${file_i}"
+    
     # Memory configuration
     # All memory is in 'G' (g)
     check_var FRAMEWORK_MEM_MASTER
     check_var FRAMEWORK_MEM_PER_WORKER
-    
+
     # G -> g for spark
     FRAMEWORK_MEM_MASTER_g=${FRAMEWORK_MEM_MASTER,,}
     FRAMEWORK_MEM_WORKER_g=${FRAMEWORK_MEM_PER_WORKER,,}
-    
+
     sed -i 's|FRAMEWORK_MEM_MASTER|'$FRAMEWORK_MEM_MASTER_g'|g' "${file_i}"
     sed -i 's|FRAMEWORK_MEM_PER_WORKER|'$FRAMEWORK_MEM_WORKER_g'|g' "${file_i}"
-  
-    
+
     check_directory LOG_DIR_RUN_CONFIG_FRAMEWORK
     sed -i 's|FRAMEWORK_CONF_DIR|'$LOG_DIR_RUN_CONFIG_FRAMEWORK'|g' "$file_i"
-    
+
     check_directory LOG_DIR_RUN_LOG_FRAMEWORK
     sed -i 's|FRAMEWORK_LOG_DIR|'$LOG_DIR_RUN_LOG_FRAMEWORK'|g' "$file_i"
 
     check_directory LOG_DIR_RUN_LOG_FRAMEWORK_LOCAL_DIR
     sed -i 's|FRAMEWORK_LOCAL_DIR|'$LOG_DIR_RUN_LOG_FRAMEWORK_LOCAL_DIR'|g' "$file_i"
-    
+
     # Java env variables env.java.home:
     check_var JAVA_HOME
     sed -i 's|FRAMEWORK_JAVA_HOME|'$JAVA_HOME'|g' "$file_i"
-  
-  done
 
-  # Logging interval
-  check_var METRIC_LOGGING_INTERVAL_SEC
-  sed -i 's|METRIC_LOGGING_INTERVAL_SEC|'METRIC_LOGGING_INTERVAL_SEC'|g' "$file_i"
+    sed -i 's|FRAMEWORK_PID_DIR|'$LOG_DIR_RUN_LOG_FRAMEWORK'/pid|g' "$file_i"
+
+    # Logging interval
+    check_var METRIC_LOGGING_INTERVAL_SEC
+    sed -i 's|METRIC_LOGGING_INTERVAL_SEC|'METRIC_LOGGING_INTERVAL_SEC'|g' "$file_i"
+  done
   ;;
 esac
 
@@ -134,7 +134,7 @@ elif [[ "${KAFKA_ARCH}" == "2" ]]; then
   TMP_CONT_QUO_VOT=""
   for WORKER_i in $WORKERS; do
     TMP_CONT_QUO_VOT="${TMP_CONT_QUO_VOT}${NODE_ID}@${WORKER_i}:9093"
-    ((NODE_ID=NODE_ID+1))
+    ((NODE_ID = NODE_ID + 1))
   done
   sed -i 's|KAFKA_SERVER_ALL|'$TMP_CONT_QUO_VOT'|g' "$KAFKA_CONFIG_SERVER_FILE"
   NODE_ID=1
@@ -143,7 +143,7 @@ elif [[ "${KAFKA_ARCH}" == "2" ]]; then
     cp "$KAFKA_CONFIG_SERVER_FILE" "$KAFKA_CONFIG_SERVER_FILE_i"
     sed -i 's|KAFKA_SERVER_HOSTNAME|'$KAFKA_SOURCE_HOST'|g' "$KAFKA_CONFIG_SERVER_FILE_i"
     sed -i 's|NODE_ID|'$NODE_ID'|g' "$KAFKA_CONFIG_SERVER_FILE_i"
-    ((NODE_ID=NODE_ID+1))
+    ((NODE_ID = NODE_ID + 1))
   done
 fi
 

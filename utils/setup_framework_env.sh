@@ -14,8 +14,8 @@ localmachine)
   flink) cp -r $FRAMEWORK_CONFIG_TEMPLATE_FLINK $LOG_DIR_RUN_CONFIG/ ;;
   spark) cp -r $FRAMEWORK_CONFIG_TEMPLATE $LOG_DIR_RUN_CONFIG/ ;;
   esac
-  NODE_LIST="localhost"
-  NODE_LIST="myworkstation"
+  #NODE_LIST="localhost"
+  NODE_LIST=$(hostname)
   ;;
 slurm_interactive | slurm_batch)
   source framework-configure.sh --framework kafka --template $FRAMEWORK_CONFIG_TEMPLATE_KAFKA --destination $LOG_DIR_RUN_CONFIG
@@ -261,8 +261,10 @@ spark)
   export FRAMEWORK_WORKERS_FILE="$LOG_DIR_RUN_CONFIG_FRAMEWORK/workers"
   export FRAMEWORK_CONF_FILES=(
     "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-defaults.conf"
-    "$LOG_DIR_RUN_CONFIG_FRAMEWORK/spark-env.sh"
+    "${LOG_DIR_RUN_CONFIG_FRAMEWORK}/spark-env.sh"
+    "${LOG_DIR_RUN_CONFIG_FRAMEWORK}/log4j2.properties"
     )
+  export ${FRAMEWORK_MAIN_U}_CONF_DIR="$LOG_DIR_RUN_CONFIG_FRAMEWORK"
   ;;
 esac
 
@@ -296,10 +298,10 @@ export KAFKA_LOG_DIR="${TMP_DIR}/${USER}/${SLURM_JOBID}/$LOG_DIR_RUN_LOG_KAFKA/k
 case $SPB_SYSTEM in
 localmachine)
   # Kafka configuration
-  export KAFKA_SOURCE_HOST="localhost"
+  export KAFKA_SOURCE_HOST=$(hostname)
   export KAFKA_SOURCE_PORT="9092"
   export KAFKA_SOURCE_BOOTSTRAP_SERVER="${KAFKA_SOURCE_HOST}:${KAFKA_SOURCE_PORT}"
-  export KAFKA_SINK_HOST="localhost"
+  export KAFKA_SINK_HOST=$(hostname)
   export KAFKA_SINK_PORT="9092"
   export KAFKA_SINK_BOOTSTRAP_SERVER="${KAFKA_SINK_HOST}:${KAFKA_SINK_PORT}"
   export KAFKA_CONF_DIR="$LOG_DIR_RUN_CONFIG_KAFKA"
