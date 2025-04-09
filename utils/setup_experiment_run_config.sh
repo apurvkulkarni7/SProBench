@@ -1,8 +1,11 @@
 #!/bin/bash
-# get_run_yaml_config.sh [FLINK|SPARK|KAFKA]
 set -e
 
 check_file CONF_FILE_RUN
+
+$YQ -i ".stream_processor.worker.instances = $NUM_WORKERS" $CONF_FILE_RUN
+$YQ -i ".stream_processor.worker.parallelism = $NUM_CPU_WORKERS" $CONF_FILE_RUN
+$YQ -i ".total_workload_hz = $GENERATOR_LOAD_HZ" $CONF_FILE_RUN
 
 export GENERATOR_TYPE="$($YQ '.generator.type' $CONF_FILE_RUN)"
 export GENERATOR_LOAD_HZ="$($YQ '.generator.load_hz' $CONF_FILE_RUN)"

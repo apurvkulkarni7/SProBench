@@ -11,6 +11,7 @@ trap_ctrlc() {
   run "STOP_LOAD"
   run "STOP_FLINK"
   run "STOP_KAFKASTREAM"
+  run "STOP_SPARKSTRUCSTREAM_PROCSESSING"
   run "STOP_KAFKA"
   run "STOP_JMX_COLLECTOR"
 }
@@ -96,7 +97,7 @@ run() {
       case $SPB_SYSTEM in
       localmachine)
         $JAVA ${SPB_STREMPROC_APP_JVM_OPTS} -cp $SPB_FRAMEWORK_CP $SPB_FRAMEWORK_CLASS \
-        $SPB_STREMPROC_APP_OPTS >"$LOG_DIR_RUN_LOG_FRAMEWORK/kafkastream_${WORKER_i}.out" 2>&1 &
+          $SPB_STREMPROC_APP_OPTS >"$LOG_DIR_RUN_LOG_FRAMEWORK/kafkastream_${WORKER_i}.out" 2>&1 &
         ;;
       slurm_batch | slurm_interactive)
         srun -O -N1 -n1 --overlap --cpus-per-task=$FRAMEWORK_PARALLELISM_PER_WORKER \
@@ -110,7 +111,29 @@ run() {
     logger_info "Kafkastream processing started"
   elif [[ "STOP_KAFKASTREAM_PROCESSING" == "$OPERATION" ]]; then
     stop_if_needed MainKafkastream MainKafkastream
+  ##############################################################################
+  # Processing - Spark structured Streaming
+  ##############################################################################
+  elif [[ "START_SPARKSTRUCSTREAM_PROCSESSING" == "$OPERATION" ]]; then
+    check_var SPARK_HOME
+    check_var SPARK_CONF_DIR
+    check_var FRAMEWORK_MASTER
+    SPB_STREMPROC_APP_JVM_OPT="--conf -DlogDir=${LOG_DIR_RUN_LOG_FRAMEWORK} --conf -DmetricLogFileName=metric.csv"
+    SPB_STREMPROC_APP_OPTS="-c ${CONF_FILE_RUN} -bs ${KAFKA_SOURCE_BOOTSTRAP_SERVER}"
+    SPB_FRAMEWORK_CP="$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar"
 
+    SPB_FRAMEWORK_CLASS="org.scadsai.benchmarks.streaming.sparkstrucstreaming.MainSparkStrucStreaming"
+    # Start cluster
+    ${SPARK_HOME}/sbin/start-all.sh 2>&1 >$LOG_DIR_RUN_LOG_FRAMEWORK/cluster.log
+    logger_info "Cluster UI available at: http://${FRAMEWORK_MASTER}:8080/"
+    logger_info "App ui available at http://${FRAMEWORK_MASTER}:4040"
+    ${SPARK_HOME}/bin/spark-submit --class $SPB_FRAMEWORK_CLASS \
+      ${SPB_STREMPROC_APP_JVM_OPT} \
+      --master "spark://$FRAMEWORK_MASTER:7077" --deploy-mode client \
+      ${SPB_FRAMEWORK_CP} ${SPB_STREMPROC_APP_OPTS} >$LOG_DIR_RUN_LOG_FRAMEWORK/app.out 2>&1 &
+    #sleep 30s
+  elif [[ "STOP_SPARKSTRUCSTREAM_PROCSESSING" == "$OPERATION" ]]; then
+    ${SPARK_HOME}/sbin/stop-all.sh 2>&1 >>$LOG_DIR_RUN_LOG_FRAMEWORK/cluster.log
   ##############################################################################
   # Generator
   ##############################################################################
@@ -259,6 +282,18 @@ run() {
     echo "==" >>$LOG_DIR_RUN_LOG/running_java_proceses
     $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
     run "STOP_KAFKASTREAM_PROCESSING"
+    run "STOP_KAFKA"
+  elif [[ "SPARKSTRUCSTREAM_TEST_START" == "$OPERATION" ]]; then
+    run "START_KAFKA"
+    run "START_SPARKSTRUCSTREAM_PROCSESSING"
+    run "START_LOAD"
+    # $JAVA_HOME/bin/jps >$LOG_DIR_RUN_LOG/running_java_proceses
+    logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    sleep "${BENCHMARK_RUNTIME_MIN}m"
+    logger_info "Completed running benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    # echo "==" >>$LOG_DIR_RUN_LOG/running_java_proceses
+    # $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
+    run "STOP_SPARK_CLUSTER"
     run "STOP_KAFKA"
   fi
 }

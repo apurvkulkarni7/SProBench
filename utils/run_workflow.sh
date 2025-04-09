@@ -16,7 +16,7 @@ source "${BENCHMARK_DIR}/utils/utils.sh"
 # Setting up directory
 logger_info "Setting up experiment directory structure"
 
-DEBUG="$($(get_curr_dir)/yaml_parser '.debug_mode' <${INIT_CONF_FILE})"
+DEBUG="$($(get_curr_dir)/yaml_parser '.debug_mode' ${INIT_CONF_FILE})"
 
 if [[ "$DEBUG" == "false" ]]; then
   case $SPB_SYSTEM in
@@ -30,20 +30,17 @@ if [[ "$DEBUG" == "false" ]]; then
   export LOG_DIR_RUN_SAVE="$LOG_DIR_RUN"
   export TMP_DIR="$($YQ '.tmp_dir' $INIT_CONF_FILE)"
   export LOG_DIR_RUN="$(realpath ${TMP_DIR})/${SLURM_JOBID}/${LOG_DIR_RUN}"
-  mkdir -p  "$LOG_DIR_RUN"
+  mkdir -p "$LOG_DIR_RUN"
   mkdir -p "$LOG_DIR_RUN_SAVE"
 fi
 
-source "$(get_curr_dir)/setup_directory_structure.sh" "$LOG_DIR_RUN" "$FRAMEWORK" "$INIT_CONF_FILE"
-# We get all the directory variables and $CONF_FILE_RUN from above line
+export ONLY_DATA_GENERATOR="$($(get_curr_dir)/yaml_parser '.generator.only_data_generator' ${INIT_CONF_FILE})"
+
+source "$(get_curr_dir)/setup_directory_structure.sh"
 check_file CONF_FILE_RUN
 
-$YQ -i ".stream_processor.worker.instances = $NUM_WORKERS" $CONF_FILE_RUN
-$YQ -i ".stream_processor.worker.parallelism = $NUM_CPU_WORKERS" $CONF_FILE_RUN
-$YQ -i ".total_workload_hz = $GENERATOR_LOAD_HZ" $CONF_FILE_RUN
-
 # Get yaml configuration of current run and export as the environment variable
-source $BENCHMARK_DIR/utils/get_run_yaml_config.sh
+source $BENCHMARK_DIR/utils/setup_experiment_run_config.sh
 
 # Setup Frameworks
 source "${BENCHMARK_DIR}/utils/setup_framework.sh"
@@ -55,6 +52,7 @@ source "${BENCHMARK_DIR}/utils/setup_framework_env.sh"
 # Setup framework configuration as per all the environment variables
 logger_info "Setting up framework configuration"
 source "${BENCHMARK_DIR}/utils/setup_framework_config.sh"
+
 
 logger_info "==================================="
 logger_info "Benchmark run started"

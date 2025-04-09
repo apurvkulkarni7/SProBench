@@ -67,14 +67,15 @@ public class OptionsGenerator {
                 System.exit(0);
             }
 
-            String yamlFile = cmd.getOptionValue("config-file");
-            String bootstrapServers = cmd.getOptionValue("bootstrap-servers");
+            BenchmarkConfig config = new ConfigLoader(cmd.getOptionValue("config-file")).parser(); // Parse yaml file
+            config.getKafka().setSourceBootstrapServer(cmd.getOptionValue("bootstrap-servers"));
+            config.getKafka().setSinkBootstrapServer(cmd.getOptionValue("bootstrap-servers")); // same as source
 
-            BenchmarkConfig config = new ConfigLoader(yamlFile).parser();
             this.config = config;
             props = new Properties();
+            // for Kafkastream
             props.put(StreamsConfig.APPLICATION_ID_CONFIG, "SProBench_KafkaStream");
-            props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrapServers); // multiple bootstrap servers for scaleout
+            props.put(StreamsConfig.BOOTSTRAP_SERVERS_CONFIG, config.getKafka().getSourceBootstrapServer()); // multiple bootstrap servers for scaleout
             // should be of the form: kafka1:9092,kafka2:9092,kafka3:9092"
             props.put(StreamsConfig.DEFAULT_KEY_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());
             props.put(StreamsConfig.DEFAULT_VALUE_SERDE_CLASS_CONFIG, Serdes.String().getClass().getName());

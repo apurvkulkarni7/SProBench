@@ -41,7 +41,7 @@ set_slurm_vars() {
 
 #Setup experiment directory structure
 setup_run_directory_structure() {
-  if [[ "$FRAMEWORK" =~ (FLINK|SPARK_STREAMING|KAFKASTREAM) ]]; then
+  if [[ "$FRAMEWORK" =~ (FLINK|SPARKSTRUCSTREAM|KAFKASTREAM) ]]; then
     RUN_DIR_NAME="W${NUM_WORKERS}_C${NUM_CPU_WORKERS}_L${GENERATOR_LOAD_HZ}/${PROCESSING_TYPE}/R${RUN_i}"
   elif [[ "$FRAMEWORK" =~ (MESSAGE_BROKER) ]]; then
     check_var GENERATOR_NUM
