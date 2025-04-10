@@ -10,10 +10,10 @@ public class SensorData {
         private long timestamp;
         private String sensorId;
         private double temperature;
-        private boolean aboveThreashold;
+        private boolean aboveThreshold;
+        private long processedTimestamp;
 
-        public SensorReading() {
-        }
+        public SensorReading() { }
 
         public SensorReading(long timestamp, String sensorId, double temperature) {
             this.timestamp = timestamp;
@@ -21,147 +21,117 @@ public class SensorData {
             this.temperature = temperature;
         }
 
-        public long getTimestamp() {
-            return timestamp;
-        }
+        public void setTimestamp(long timestamp) { this.timestamp = timestamp; }
+        public long getTimestamp() { return timestamp; }
 
-        public void setTimestamp(long timestamp) {
-            this.timestamp = timestamp;
-        }
+        public void setSensorId(String sensorId) { this.sensorId = sensorId; }
+        public String getSensorId() { return sensorId; }
 
-        public double getTemperature() {
-            return temperature;
-        }
+        public double getTemperature() { return temperature; }
+        public void setTemperature(double temperature) { this.temperature = temperature; }
 
-        public void setTemperature(double temperature) {
-            this.temperature = temperature;
-        }
-
-        public boolean isAboveThreashold() {
-            return this.aboveThreashold;
-        }
-
-        public void setAboveThreashold(boolean aboveThreashold) {
-            this.aboveThreashold = aboveThreashold;
-        }
-
-        public String getSensorId() {
-            return sensorId;
-        }
-
-        public void setSensorId(String sensorId) {
-            this.sensorId = sensorId;
-        }
+        public boolean isAboveThreshold() { return aboveThreshold; }
+        public void setAboveThreshold(boolean aboveThreashold) { this.aboveThreshold = aboveThreashold; }
 
         @Override
         public String toString() {
-            return this.timestamp + "," + this.sensorId + "," + this.temperature + "," + this.aboveThreashold;
+            return "SensorReading{" +
+                    "sensorId='" + sensorId + "'" +
+                    ", timestamp=" + timestamp +
+                    ", temperature=" + temperature +
+                    ", aboveThreshold=" + aboveThreshold +
+                    "}";
         }
     }
 
     public static class SensorIdStats {
         private long lastTimestamp;
         private String sensorId;
-        private double sum = 0;
-        private double avg = 0;
-        private int count = 0;
-        private double min = 0;
-        private double max = 0;
-        private long throughput = 0L;
-        private double latency = 0;
-        private long windowLength_ms = 1;
+        private double min = Double.POSITIVE_INFINITY;
+        private double max = Double.NEGATIVE_INFINITY;
+        private double avg;
+        private long windowLengthMs;
+        private long throughput;
+        private double latency;
 
-        public SensorIdStats() {
-        }
+        // Transient fields excluded from encoding
+        private transient double sum;
+        private transient long count;
 
-        public double getMin() {
-            return min;
-        }
+        public SensorIdStats() {}
 
-        public double getMax() {
-            return max;
-        }
+        // Getters and Setters (only those which needs to be encoded)
+        public long getLastTimestamp() { return lastTimestamp; }
+        public void setLastTimestamp(long lastTimestamp) { this.lastTimestamp = lastTimestamp; }
 
-        public double getSum() {
-            return sum;
-        }
+        public String getSensorId() { return sensorId; }
+        public void setSensorId(String sensorId) { this.sensorId = sensorId; }
 
-        public int getCount() {
-            return count;
-        }
+        public double getMin() { return min; }
+        public void setMin(double min) { this.min = min; }
 
-        public double getAvg() {
-            return avg;
-        }
+        public double getMax() { return max; }
+        public void setMax(double max) { this.max = max; }
 
-        public long getLastTimestamp() {
-            return this.lastTimestamp;
-        }
+        public double getAvg() { return avg; }
+        public void setAvg(double avg) { this.avg = avg; }
 
-        public void setLastTimestamp(long latestTimestamp) {
-            this.lastTimestamp = latestTimestamp;
-        }
+        public long getWindowLengthMs() { return windowLengthMs; }
+        public void setWindowLengthMs(long windowLength_ms) { this.windowLengthMs = windowLength_ms; }
 
-        public String getSensorId() {
-            return this.sensorId;
-        }
+        public long getThroughput() { return throughput; }
+        public void setThroughput(long throughput) { this.throughput = throughput; }
 
-        public void setSensorId(String sensorId) {
-            this.sensorId = sensorId;
-        }
-
-        public long getThroughput() {
-            return this.throughput;
-        }
-
-        public void setThroughput(long throughput) {
-            this.throughput = throughput;
-        }
-
-        public double getLatency() {
-            return this.latency;
-        }
-
-        public void setLatency(double latency) {
-            this.latency = latency;
-        }
-
-        public long getWindowLength_ms() {
-            return this.windowLength_ms;
-        }
-
-        public void setWindowLength_ms(long windowLength_ms) {
-            this.windowLength_ms = windowLength_ms;
-        }
+        public double getLatency() { return latency; }
+        public void setLatency(double latency) { this.latency = latency; }
 
         public void updateMetrics() {
-            setThroughput(getCount() * 1000 / getWindowLength_ms());
-            setLatency(System.currentTimeMillis() - getLastTimestamp());
+            this.throughput = count * 1000 / this.windowLengthMs;
+            this.latency = System.currentTimeMillis() - this.lastTimestamp;
         }
 
-        public void update(String sensorId, long lastTimestamp, double temperature, long windowLength_ms) {
-            min = Math.min(min, temperature);
-            max = Math.max(max, temperature);
-            sum += temperature;
-            count++;
-            avg = sum / count;
+        public void update(String sensorId, long lastTimestamp, double temperature, long windowLengthMs) {
+            this.min = Math.min(min, temperature);
+            this.max = Math.max(max, temperature);
+            this.sum += temperature;
+            this.count++;
+            this.avg = sum / count;
 
-            setSensorId(sensorId);
             if (lastTimestamp > this.lastTimestamp) {
-                setLastTimestamp(lastTimestamp);
+                this.lastTimestamp = lastTimestamp;
             }
-            setWindowLength_ms(windowLength_ms);
+
+            this.windowLengthMs = windowLengthMs;
+            this.sensorId = sensorId;
             updateMetrics();
+        }
+
+        public void updateStatsManual(String sensorId, double avg, double min, double max,
+                                      long windowLength_ms, long lastTimestamp,
+                                      long throughput, double latency) {
+            setSensorId(sensorId);
+            setAvg(avg);
+            setMin(min);
+            setMax(max);
+            setWindowLengthMs(windowLength_ms);
+            setLastTimestamp(lastTimestamp);
+            setThroughput(throughput);
+            setLatency(latency);
+
+            // Explicitly reset derived transient fields to invalid state
+            this.sum = -1;
+            this.count = -1;
         }
 
         @Override
         public String toString() {
-            return "TemperatureStats{" +
-                    "sensorID=" + sensorId +
-                    "min=" + min +
+            return "SensorIdStats{" +
+                    "sensorId='" + sensorId + '\'' +
+                    ", timestamp=" + lastTimestamp +
+                    ", min=" + min +
                     ", max=" + max +
                     ", avg=" + avg +
-                    ", count=" + count +
+                    ", windowLengthMs=" + windowLengthMs +
                     ", throughput=" + throughput +
                     ", latency=" + latency +
                     '}';

@@ -28,7 +28,7 @@ public class Transformations {
     }
 
     public SensorReading TemperatureConvertorDetector(SensorReading input) {
-        input.setAboveThreashold(input.getTemperature() > 70);
+        input.setAboveThreshold(input.getTemperature() > 70);
         input.setTemperature(roundOfThree((input.getTemperature() * 9 / 5) + 32));
         return input;
     }

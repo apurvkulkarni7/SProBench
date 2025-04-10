@@ -85,7 +85,7 @@ generator:
 #                   monitoring, etc)
 # - mem_node_spare: Reserve memory (GB) per worker node for system operations
 stream_processor:
-  processing_type: P2
+  processing_type: P0
   framework:
     #- flink
     # - kafkastream
