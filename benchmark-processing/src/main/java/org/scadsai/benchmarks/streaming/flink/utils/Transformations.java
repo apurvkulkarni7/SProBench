@@ -48,7 +48,7 @@ public class Transformations {
     public static class TemperatureConvertorDetector implements MapFunction<SensorReading, SensorReading> {
         @Override
         public SensorReading map(SensorReading inputStream) throws Exception {
-            inputStream.setAboveThreashold(inputStream.getTemperature() > 70);
+            inputStream.setAboveThreshold(inputStream.getTemperature() > 70);
             inputStream.setTemperature(roundOfThree((inputStream.getTemperature() * 9 / 5) + 32));
             return inputStream;
         }

@@ -118,20 +118,22 @@ run() {
     check_var SPARK_HOME
     check_var SPARK_CONF_DIR
     check_var FRAMEWORK_MASTER
-    SPB_STREMPROC_APP_JVM_OPT="--conf -DlogDir=${LOG_DIR_RUN_LOG_FRAMEWORK} --conf -DmetricLogFileName=metric.csv"
     SPB_STREMPROC_APP_OPTS="-c ${CONF_FILE_RUN} -bs ${KAFKA_SOURCE_BOOTSTRAP_SERVER}"
     SPB_FRAMEWORK_CP="$BENCHMARK_DIR/benchmark-processing/target/benchmark-processing-1.0.jar"
-
     SPB_FRAMEWORK_CLASS="org.scadsai.benchmarks.streaming.sparkstrucstreaming.MainSparkStrucStreaming"
+    
     # Start cluster
+    logger_info "Starting Spark cluster"
     ${SPARK_HOME}/sbin/start-all.sh 2>&1 >$LOG_DIR_RUN_LOG_FRAMEWORK/cluster.log
     logger_info "Cluster UI available at: http://${FRAMEWORK_MASTER}:8080/"
     logger_info "App ui available at http://${FRAMEWORK_MASTER}:4040"
+    
+    logger_info "Starting Spark Struc. Stream processing"
     ${SPARK_HOME}/bin/spark-submit --class $SPB_FRAMEWORK_CLASS \
-      ${SPB_STREMPROC_APP_JVM_OPT} \
+      --driver-java-options "-DlogDir=${LOG_DIR_RUN_LOG_FRAMEWORK} -DmetricLogFileName=metric.csv" \
       --master "spark://$FRAMEWORK_MASTER:7077" --deploy-mode client \
       ${SPB_FRAMEWORK_CP} ${SPB_STREMPROC_APP_OPTS} >$LOG_DIR_RUN_LOG_FRAMEWORK/app.out 2>&1 &
-    #sleep 30s
+
   elif [[ "STOP_SPARKSTRUCSTREAM_PROCSESSING" == "$OPERATION" ]]; then
     ${SPARK_HOME}/sbin/stop-all.sh 2>&1 >>$LOG_DIR_RUN_LOG_FRAMEWORK/cluster.log
   ##############################################################################

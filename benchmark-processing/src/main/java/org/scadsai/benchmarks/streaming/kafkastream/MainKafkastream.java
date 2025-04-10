@@ -72,14 +72,14 @@ public class MainKafkastream {
                                 Grouped.with(Serdes.String(), new SensorReadingSerde())
                         )
                         .windowedBy(
-                                TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(config.getStreamProcessor().getWindowLength()))
-                                        .advanceBy(Duration.ofMillis(config.getStreamProcessor().getWindowAdvance()))
+                                TimeWindows.ofSizeWithNoGrace(Duration.ofMillis(config.getStreamProcessor().getWindowLengthMs()))
+                                        .advanceBy(Duration.ofMillis(config.getStreamProcessor().getWindowAdvanceMs()))
                         )
                         .aggregate(
                                 () -> new SensorIdStats(),                                  // Initialize
                                 (key, value, stats) -> {    // Assuming 'value' is of type SensorReading and 'key' is sensorId (String)
                                     stats.setSensorId(key);
-                                    stats.update(key, value.getTimestamp(), value.getTemperature(), config.getStreamProcessor().getWindowLength());
+                                    stats.update(key, value.getTimestamp(), value.getTemperature(), config.getStreamProcessor().getWindowLengthMs());
                                     return stats;
                                 },
                                 Materialized.<String, SensorIdStats, WindowStore<Bytes, byte[]>>as("sensor-stats-store")
