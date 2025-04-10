@@ -4,17 +4,16 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.apache.spark.api.java.function.FilterFunction;
 import org.apache.spark.api.java.function.MapFunction;
-import org.apache.spark.sql.Dataset;
-import org.apache.spark.sql.Encoders;
-import org.apache.spark.sql.Row;
-import org.apache.spark.sql.SparkSession;
+import org.apache.spark.sql.*;
 import org.apache.spark.sql.streaming.OutputMode;
 import org.apache.spark.sql.streaming.StreamingQuery;
 import org.apache.spark.sql.streaming.StreamingQueryException;
 import org.apache.spark.sql.streaming.StreamingQueryListener;
 import org.scadsai.benchmarks.streaming.kafkastream.OptionsGenerator;
 import org.scadsai.benchmarks.streaming.utils.ConfigLoader.BenchmarkConfig;
+import org.scadsai.benchmarks.streaming.utils.SensorData.SensorIdStats;
 import org.scadsai.benchmarks.streaming.utils.SensorData.SensorReading;
+import org.apache.spark.sql.types.DataTypes;
 
 import java.util.Objects;
 import java.util.Properties;
@@ -40,7 +39,7 @@ public class MainSparkStrucStreaming {
                 .master("local[*]")
                 .getOrCreate();
 
-        spark.sparkContext().setLogLevel("INFO");
+        spark.sparkContext().setLogLevel("WARN");
 
         // Read from Kafka
         Dataset<Row> sourceStream = spark
@@ -106,19 +105,19 @@ public class MainSparkStrucStreaming {
         if (processingType.equals("P0")) {
             // P0: Pass-through with timestamp
             result = sourceStream.select(
-                            split(col("value"), ",").getItem(0).as("timestamp_ms"),
-                            split(col("value"), ",").getItem(1).as("sensor_id"),
+                            split(col("value"), ",").getItem(0).as("timestamp"),
+                            split(col("value"), ",").getItem(1).as("sensorId"),
                             split(col("value"), ",").getItem(2).as("value")
-                    ).withColumn("ingest_timestamp", current_timestamp())
-                    .withColumn("ingest_timestamp_ms",
-                            unix_timestamp(col("ingest_timestamp"))
+                    ).withColumn("ingestTimestamp", current_timestamp())
+                    .withColumn("ingestTimestamp",
+                            unix_timestamp(col("ingestTimestamp"))
                                     .multiply(1000)
-                                    .plus(expr("cast(date_format(ingest_timestamp, 'SSS') as long)"))
+                                    .plus(expr("cast(date_format(ingestTimestamp, 'SSS') as long)"))
                                     .cast("long")
                     )
                     .selectExpr(
-                            "CAST(ingest_timestamp AS STRING) AS key", // Use ingest timestamp as key (optional)
-                            "CAST(concat_ws(',', timestamp_ms, sensor_id, value, ingest_timestamp_ms) AS STRING) AS value"
+                            "CAST(ingestTimestamp AS STRING) AS key", // Use ingest timestamp as key (optional)
+                            "CAST(concat_ws(',', timestamp, sensorId, value, ingestTimestamp) AS STRING) AS value"
                     ).toJSON();
         } else {
             // Parse input
@@ -149,15 +148,53 @@ public class MainSparkStrucStreaming {
                                 Encoders.javaSerialization(SensorReading.class)
                         )
                         .toJSON();
+            } else if (processingType.equals("P2")) {
+                result = parsedStream
+                        .withColumn(
+                                "eventTime", (col("timestamp").cast(DataTypes.LongType).$div(1000))
+                                        .cast(DataTypes.TimestampType)
+                        )
+                        .withWatermark("eventTime", "100 milliseconds")
+                        .groupBy(
+                                col("sensordId"),
+                                window(
+                                        parsedStream.col("eventTime"),
+                                        config.getStreamProcessor().getWindowLengthMs() + " milliseconds",
+                                        config.getStreamProcessor().getWindowAdvanceMs() + " milliseconds"
+                                )
+                        )
+                        .agg(
+                                first("sensorId").as("sensorId"),
+                                min("temperature").as("min"),
+                                max("temperature").as("max"),
+                                sum("temperature").as("sum"),
+                                avg("temperature").as("avg"),
+                                count("timestamp").as("count"),
+                                max("timestamp").as("lastTimestamp")
+                        )
+                        .withColumn("windowLength", lit(config.getStreamProcessor().getWindowLengthMs()))
+                        .withColumn("throughput", ( // Throughput: events per second
+                                col("count")
+                                        .cast(DataTypes.LongType)
+                                        .multiply(1000L)
+                                        .divide(lit(config.getStreamProcessor().getWindowLengthMs())).cast(DataTypes.LongType)
+                                        .cast(DataTypes.LongType)
+                        ))
+                        .withColumn("latency", (
+                                unix_timestamp(col("window.end"))
+                                        .cast(DataTypes.LongType)
+                                        .multiply(1000L)
+                                        .minus(col("lastTimestamp"))
+                        ))
+                        .select(
+                                col("sensorId"),
+                                col("temperatureMin"),
+                                col("temperatureMax"),
+                                col("temperatureAvg"),
+                                col("throughput"),
+                                col("latency")
+                        ).toJSON();
             }
-//            else if (processingType.equals("P2")) {
-//                result = parsedStream.map(
-//                        (MapFunction<SensorReading, SensorIdStats>) row -> {
-//
-//                            return String.valueOf(row);
-//                        },
-//                        Encoders.javaSerialization(String.class));
-//            }
         }
         return result;
     }

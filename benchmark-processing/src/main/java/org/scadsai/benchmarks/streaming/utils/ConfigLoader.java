@@ -145,7 +145,7 @@ public class ConfigLoader {
             this.streamProcessor.setWorker((Map<String, Object>) streamProcessorRaw.get("worker"));
             this.streamProcessor.setStateDir(streamProcessorRaw.get("stateful_dir").toString());
             this.streamProcessor.setWindowLength(Long.parseLong(streamProcessorRaw.get("window_length_ms").toString()));
-            this.streamProcessor.setWindowAdvance(Long.parseLong(streamProcessorRaw.get("window_advance_ms").toString()));
+            this.streamProcessor.setWindowAdvanceMs(Long.parseLong(streamProcessorRaw.get("window_advance_ms").toString()));
         }
 
         public int getNumCpusSpare() {
@@ -342,15 +342,15 @@ public class ConfigLoader {
             this.windowLengthMs = windowLengthMs;
         }
 
-        public long getWindowLength() {
+        public long getWindowLengthMs() {
             return this.windowLengthMs;
         }
 
-        public void setWindowAdvance(long windowAdvanceMs) {
+        public void setWindowAdvanceMs(long windowAdvanceMs) {
             this.windowAdvanceMs = windowAdvanceMs;
         }
 
-        public long getWindowAdvance() {
+        public long getWindowAdvanceMs() {
             return this.windowAdvanceMs;
         }
     }
