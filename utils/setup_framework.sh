@@ -59,9 +59,10 @@ slurm_interactive | slurm_batch)
   done
 
   # Load stream processing framework
-  logger_info "Loading stream processing framework (${FRAMEWORK_MAIN_L}) module."
-  load_modules $($YQ '.frameworks["'"${FRAMEWORK_MAIN_L}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
-
+  if [[ "$FRAMEWORK_MAIN_L" != "messagebroker" ]]; then
+    logger_info "Loading stream processing framework (${FRAMEWORK_MAIN_L}) module."
+    load_modules $($YQ '.frameworks["'"${FRAMEWORK_MAIN_L}"'"].slurm_setup.module_name_version' $CONF_FILE_RUN)
+  fi
   # Set some environment variables
   if [[ -z $JAVA_HOME ]]; then
     logger_error "Java module not loaded correctly."
