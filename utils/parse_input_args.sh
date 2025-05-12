@@ -158,6 +158,8 @@ if [[ $HAS_COMPILE -eq 1 ]]; then
       load_modules \
         $($YQ '.frameworks["'"${CORE_FRAMEWORK_i}"'"].slurm_setup.module_name_version' $INIT_CONF_FILE)
     done
+    export MAVEN_HOME=$(dirname $(dirname $(which mvn)))
+    export JAVA_HOME=$(dirname $(dirname $(which java)))
     ;;
   esac
   $MAVEN_HOME/bin/mvn clean package
