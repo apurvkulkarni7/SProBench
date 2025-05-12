@@ -1,9 +1,9 @@
-package org.metrics.org.scadsai.benchmarks.metrics;
+package org.scadsai.benchmarks.metrics;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.metrics.org.scadsai.benchmarks.metrics.util.CliParamGenerator;
+import org.scadsai.benchmarks.metrics.util.CliParamGenerator;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -11,8 +11,8 @@ import java.lang.management.ManagementFactory;
 import java.nio.file.Files;
 import java.nio.file.Path;
 
-import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.kafkaMetricExtractorRunner;
-import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.setLoggerProperties;
+import static org.scadsai.benchmarks.metrics.util.MetricUtil.kafkaMetricExtractorRunner;
+import static org.scadsai.benchmarks.metrics.util.MetricUtil.setLoggerProperties;
 
 public class KafkaMetricExtractor {
     public static void main(String[] args) {

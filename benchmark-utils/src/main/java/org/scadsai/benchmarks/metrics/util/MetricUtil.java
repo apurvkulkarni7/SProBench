@@ -1,4 +1,4 @@
-package org.metrics.org.scadsai.benchmarks.metrics.util;
+package org.scadsai.benchmarks.metrics.util;
 
 import com.sun.tools.attach.AgentInitializationException;
 import com.sun.tools.attach.AgentLoadException;

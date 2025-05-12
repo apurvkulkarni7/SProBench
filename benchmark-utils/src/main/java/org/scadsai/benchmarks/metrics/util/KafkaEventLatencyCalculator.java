@@ -1,4 +1,4 @@
-package org.metrics.org.scadsai.benchmarks.metrics.util;
+package org.scadsai.benchmarks.metrics.util;
 
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.clients.consumer.ConsumerRecord;
@@ -12,7 +12,7 @@ import java.util.Properties;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import static org.metrics.org.scadsai.benchmarks.metrics.util.CliParamGenerator.mainLogger;
+import static org.scadsai.benchmarks.metrics.util.CliParamGenerator.mainLogger;
 
 public class KafkaEventLatencyCalculator {
     static Properties properties = new Properties();
