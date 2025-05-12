@@ -85,9 +85,9 @@ generator:
 #                   monitoring, etc)
 # - mem_node_spare: Reserve memory (GB) per worker node for system operations
 stream_processor:
-  processing_type: P0
   framework:
     - flink
+  processing_type: P0
   master:
     cpu: 1
     memory_gb: 1
