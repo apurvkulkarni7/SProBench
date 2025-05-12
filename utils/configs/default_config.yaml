@@ -87,9 +87,7 @@ generator:
 stream_processor:
   processing_type: P0
   framework:
-    #- flink
-    # - kafkastream
-    - sparkstrucstream
+    - flink
   master:
     cpu: 1
     memory_gb: 1
