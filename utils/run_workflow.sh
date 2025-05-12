@@ -57,7 +57,7 @@ source "${BENCHMARK_DIR}/utils/setup_framework_config.sh"
 logger_info "==================================="
 logger_info "Benchmark run started"
 logger_info "==================================="
-# Run the benchmark
+
 source $BENCHMARK_DIR/utils/benchmark_main.sh "${FRAMEWORK}_TEST_$MODE"
 sleep 10s
 

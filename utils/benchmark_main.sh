@@ -227,7 +227,7 @@ run() {
   #############################################################################
   # Workflow - Generator testing
   #############################################################################
-  elif [[ "GENERATOR_TEST_START" == "$OPERATION" ]]; then
+  elif [[ "MESSAGEBROKER_TEST_START" == "$OPERATION" ]]; then
     if [[ "$ONLY_DATA_GENERATOR" == "True" ]]; then
       run "START_LOAD"
     else

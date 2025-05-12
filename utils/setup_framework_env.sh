@@ -20,9 +20,11 @@ localmachine)
 slurm_interactive | slurm_batch)
   source framework-configure.sh --framework kafka --template $FRAMEWORK_CONFIG_TEMPLATE_KAFKA --destination $LOG_DIR_RUN_CONFIG
 
-  # Initialize framework configuration
-  FRAMEWORK_CONFIG_TEMPLATE="FRAMEWORK_CONFIG_TEMPLATE_${FRAMEWORK_MAIN_U}" # Construct the variable name
-  source framework-configure.sh --framework ${FRAMEWORK_MAIN_L} --template ${!FRAMEWORK_CONFIG_TEMPLATE} --destination $LOG_DIR_RUN_CONFIG
+  if [[ "$FRAMEWORK_MAIN_L" != "messagebroker" ]]; then
+    # Initialize framework configuration
+    FRAMEWORK_CONFIG_TEMPLATE="FRAMEWORK_CONFIG_TEMPLATE_${FRAMEWORK_MAIN_U}" # Construct the variable name
+    source framework-configure.sh --framework ${FRAMEWORK_MAIN_L} --template ${!FRAMEWORK_CONFIG_TEMPLATE} --destination $LOG_DIR_RUN_CONFIG
+  fi
 
   NODE_LIST=$(scontrol show hostname $SLURM_NODELIST | sort -u)
   ;;
@@ -35,7 +37,7 @@ logger_info "Total available nodes: ${NODE_LIST[*]}"
 #################################################################
 # Framework env configuration
 #################################################################
-
+if [[ "$FRAMEWORK_MAIN_L" != "messagebroker" ]]; then
 case $FRAMEWORK_MAIN_L in
 flink)
   export FLINK_MASTER="${NODE_LIST[0]}"
@@ -267,7 +269,7 @@ spark)
   export ${FRAMEWORK_MAIN_U}_CONF_DIR="$LOG_DIR_RUN_CONFIG_FRAMEWORK"
   ;;
 esac
-
+fi
 #################################################################
 # Kafka configuration
 #################################################################
