@@ -8,11 +8,9 @@ $YQ -i ".stream_processor.worker.parallelism = $NUM_CPU_WORKERS" $CONF_FILE_RUN
 $YQ -i ".total_workload_hz = $GENERATOR_LOAD_HZ" $CONF_FILE_RUN
 
 export GENERATOR_TYPE="$($YQ '.generator.type' $CONF_FILE_RUN)"
-export GENERATOR_LOAD_HZ="$($YQ '.generator.load_hz' $CONF_FILE_RUN)"
-export GENERATOR_LOAD_PER_GENERATOR_HZ="500000"
-export GENERATOR_NUM="$(((GENERATOR_LOAD_HZ+GENERATOR_LOAD_PER_GENERATOR_HZ-1)/GENERATOR_LOAD_PER_GENERATOR_HZ))"
-# Adjusting the load per generator based on calculated number of generator
+export GENERATOR_LOAD_HZ="$($YQ '.total_workload_hz' $CONF_FILE_RUN)"
 export GENERATOR_LOAD_PER_GENERATOR_HZ="$((GENERATOR_LOAD_HZ/GENERATOR_NUM))"
+export GENERATOR_NUM="$(((GENERATOR_LOAD_HZ+GENERATOR_LOAD_PER_GENERATOR_HZ-1)/GENERATOR_LOAD_PER_GENERATOR_HZ))"
 
 export GENERATOR_CPU_NUM="$($YQ '.generator.cpu' $CONF_FILE_RUN)"
 export GENERATOR_THREAD_PER_CPU_NUM="$($YQ '.generator.threads_per_cpu_num' $CONF_FILE_RUN)"

@@ -132,14 +132,10 @@ system_handler_slurm() {
 ################################################################################
 
 check_var GENERATOR_LOAD_HZ
-if [[ "${GENERATOR_LOAD_HZ}" -ge "500000" ]]; then
-  export GENERATOR_LOAD_PER_GENERATOR_HZ="500000"
-  export GENERATOR_NUM="$(((GENERATOR_LOAD_HZ_i+GENERATOR_LOAD_PER_GENERATOR_HZ-1)/GENERATOR_LOAD_PER_GENERATOR_HZ))"
-  export GENERATOR_LOAD_PER_GENERATOR_HZ="$((GENERATOR_LOAD_HZ/GENERATOR_NUM))"
-else
-  export GENERATOR_LOAD_PER_GENERATOR_HZ="${GENERATOR_LOAD_HZ_i}"
-  export GENERATOR_NUM="1"
-fi
+
+export GENERATOR_LOAD_PER_GENERATOR_HZ="$($YQ '.generator.load_hz' $INIT_CONF_FILE)"
+export GENERATOR_NUM="$(((GENERATOR_LOAD_HZ+GENERATOR_LOAD_PER_GENERATOR_HZ-1)/GENERATOR_LOAD_PER_GENERATOR_HZ))"
+
 BENCHMARK_RUNTIME_MIN="$($YQ '.benchmark_runtime_min' $INIT_CONF_FILE)"
 
 setup_run_directory_structure
