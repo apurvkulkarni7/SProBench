@@ -68,10 +68,7 @@ system_handler_slurm() {
     $SPB_RUN_WORKFLOW_SCRIPT_FULL
     ;;
   slurm_batch)
-
     set_slurm_vars
-    echo $HPC_JOB_NAME
-    exit 0
     check_var HPC_PROJECT_ID
     check_var HPC_NUM_NODES
     check_var HPC_EXCLUSIVE

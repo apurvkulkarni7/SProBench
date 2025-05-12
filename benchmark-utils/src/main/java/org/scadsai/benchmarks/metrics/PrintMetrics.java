@@ -1,12 +1,12 @@
-package org.metrics.org.scadsai.benchmarks.metrics;
+package org.scadsai.benchmarks.metrics;
 
 import org.apache.commons.cli.CommandLine;
-import org.metrics.org.scadsai.benchmarks.metrics.util.CliParamGenerator;
+import org.scadsai.benchmarks.metrics.util.CliParamGenerator;
 
 import javax.management.MBeanServerConnection;
 
-import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.getMBeansServerConnection;
-import static org.metrics.org.scadsai.benchmarks.metrics.util.MetricUtil.getMetricsList;
+import static org.scadsai.benchmarks.metrics.util.MetricUtil.getMBeansServerConnection;
+import static org.scadsai.benchmarks.metrics.util.MetricUtil.getMetricsList;
 
 public class PrintMetrics {
     public static void main(String[] args) {

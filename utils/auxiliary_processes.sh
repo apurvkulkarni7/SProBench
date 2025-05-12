@@ -9,7 +9,7 @@ run_jmx_collector() {
 
   local jobid=$SLURM_JOBID
   local process_mem="300M"
-  local jmx_classpath="${BENCHMARK_DIR}/benchmark-utils/target/benchmark-utils-1.0.jar org.metrics.${metric_collector}"
+  local jmx_classpath="${BENCHMARK_DIR}/benchmark-utils/target/benchmark-utils-1.0.jar org.scadsai.benchmarks.metrics.${metric_collector}"
   local jmx_jvm_opt="-DlogDir=${LOG_DIR_RUN_LOG_JMX}"
   local METRIC_LOGGING_INTERVAL_MS=$((METRIC_LOGGING_INTERVAL_SEC * 1000))
 
