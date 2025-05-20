@@ -235,7 +235,7 @@ Don't forget to give the project a star! Thanks again!
 <!-- LICENSE -->
 ## License
 
-Distributed under the **GNU GENERAL PUBLIC LICENSE V3**. See [LICENSE](./LICENSE) for more information.
+Distributed under the **MIT LICENSE**. See [LICENSE](./LICENSE) for more information.
 
 <p align="right">(<a href="#">back to top</a>)</p>
 
