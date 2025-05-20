@@ -247,7 +247,21 @@ Distributed under the **MIT LICENSE**. See [LICENSE](./LICENSE) for more informa
 
 <p align="right">(<a href="#">back to top</a>)</p>
 
+## Citation
 
+If you use this repository, please cite the following paper:
+
+```bibtex
+@misc{kulkarni2025sprobenchstreamprocessingbenchmark,
+      title={SProBench: Stream Processing Benchmark for High Performance Computing Infrastructure}, 
+      author={Apurv Deepak Kulkarni and Siavash Ghiasvand},
+      year={2025},
+      eprint={2504.02364},
+      archivePrefix={arXiv},
+      primaryClass={cs.DC},
+      url={https://arxiv.org/abs/2504.02364}, 
+}
+```
 
 <!-- MARKDOWN LINKS & IMAGES -->
 <!-- https://www.markdownguide.org/basic-syntax/#reference-style-links -->
