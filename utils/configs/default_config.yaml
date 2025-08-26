@@ -66,7 +66,8 @@ generator:
 #   - messagebroker : Basic message routing
 #   - flink         : Apache Flink engine
 #   - spark         : Apache Spark Streaming
-#   - kafkastream   : Kafka Streams API
+#   - kafkastream   : Kafka Streams
+#   - windflow      : Windflow
 # - master: Master node configuration
 #   - cpu       : Number of CPUs for master processes
 #   - memory_gb : Memory in GB for master processes
@@ -192,6 +193,17 @@ frameworks:
       path: default
   spark:
     version: 3.5.3
+    local_setup:
+      path: default
+    slurm_setup:
+      use_module_system: true
+      module_name_version:
+      dependent_modules:
+        - depency1
+        - depency2
+      path: default
+  windflow:
+    version: 4.2.0
     local_setup:
       path: default
     slurm_setup:

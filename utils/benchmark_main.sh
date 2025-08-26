@@ -137,6 +137,15 @@ run() {
   elif [[ "STOP_SPARKSTRUCSTREAM_PROCSESSING" == "$OPERATION" ]]; then
     ${SPARK_HOME}/sbin/stop-all.sh 2>&1 >>$LOG_DIR_RUN_LOG_FRAMEWORK/cluster.log
   ##############################################################################
+  # Hazelcast
+  ##############################################################################
+  elif [[ "START_HAZELCAST" == "$OPERATION" ]]; then
+  ##############################################################################
+  # Windflow
+  ##############################################################################
+  elif [[ "START_WINDFLOW" == "$OPERATION" ]]; then
+    bash ${BENCHMARK_DIR}/benchmark-processing/windflow/pipeline
+  ##############################################################################
   # Generator
   ##############################################################################
   elif [[ "START_LOAD" == "$OPERATION" ]]; then
@@ -270,6 +279,9 @@ run() {
     run "STOP_FLINK"
     run "STOP_JMX_COLLECTOR"
     run "STOP_KAFKA"
+  #############################################################################
+  # Workflow - Kafkastream
+  #############################################################################
   elif [[ "KAFKASTREAM_TEST_START" == "$OPERATION" ]]; then
     run "START_KAFKA"
     run "START_KAFKASTREAM_PROCESSING"
@@ -285,6 +297,9 @@ run() {
     $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
     run "STOP_KAFKASTREAM_PROCESSING"
     run "STOP_KAFKA"
+  #############################################################################
+  # Workflow - Spark
+  #############################################################################
   elif [[ "SPARKSTRUCSTREAM_TEST_START" == "$OPERATION" ]]; then
     run "START_KAFKA"
     run "START_SPARKSTRUCSTREAM_PROCSESSING"
@@ -296,6 +311,19 @@ run() {
     # echo "==" >>$LOG_DIR_RUN_LOG/running_java_proceses
     # $JAVA_HOME/bin/jps >>$LOG_DIR_RUN_LOG/running_java_proceses
     run "STOP_SPARK_CLUSTER"
+    run "STOP_KAFKA"
+  #############################################################################
+  # Workflow - Spark
+  #############################################################################
+  elif [[ "WINDFLOW_TEST_START" == "$OPERATION" ]]; then
+    run "START_KAFKA"
+    run "START_WINDFLOW"
+    run "START_LOAD"
+    logger_info "Running the benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    sleep "${BENCHMARK_RUNTIME_MIN}m"
+    logger_info "Completed running benchmark for $BENCHMARK_RUNTIME_MIN minutes."
+    # Generator stops automatically
+    run "STOP_WINDFLOW"
     run "STOP_KAFKA"
   fi
 }

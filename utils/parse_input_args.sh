@@ -162,7 +162,13 @@ if [[ $HAS_COMPILE -eq 1 ]]; then
     export JAVA_HOME=$(dirname $(dirname $(which java)))
     ;;
   esac
+  
+  # Compile java based Frameworks: Spark, Flink, Kafkastream
   $MAVEN_HOME/bin/mvn clean package
+  
+  # Complie Windflow
+  g++ ${BENCHMARK_DIR}/benchmark-processing/windflow/main.cpp -o pipeline -lwindflow -lrdkafka -lpthread
+  
   logger_info "Compilation complete"
   exit 0
 fi
